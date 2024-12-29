@@ -33,6 +33,39 @@ def home():
 
     return render_template('home.html', username=session['username'])
 
+
+@app.route('/products')
+def products():
+    return "Produkty"
+
+@app.route('/accounts')
+def accounts():
+    return "Konta"
+
+@app.route('/cards')
+def cards():
+    return "Karty"
+
+@app.route('/loans')
+def loans():
+    return "Pożyczki"
+
+
+@app.route('/payments')
+def payments():
+    return "Płatności"
+
+
+@app.route('/offers')
+def offers():
+    return "Oferty"
+
+
+@app.route('/financial_management')
+def financial_management():
+    return "Zarządzanie finansami"
+
+
 # Wylogowanie
 @app.route('/logout')
 def logout():
