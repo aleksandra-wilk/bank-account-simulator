@@ -38,13 +38,16 @@ def home():
 def products():
     return "Produkty"
 
+
 @app.route('/accounts')
 def accounts():
     return "Konta"
 
+
 @app.route('/cards')
 def cards():
     return "Karty"
+
 
 @app.route('/loans')
 def loans():
