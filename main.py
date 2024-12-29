@@ -1,11 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 
+
 app = Flask(__name__)
 app.secret_key = "your_secret_key"  # Klucz do sesji
+
 
 # Wstępnie zdefiniowany użytkownik
 LOGIN = "admin"
 PASSWORD = "admin"
+
 
 # Strona logowania
 @app.route('/', methods=['GET', 'POST'])
@@ -25,48 +28,63 @@ def login():
 
     return render_template('login.html')
 
+
 # Strona główna
 @app.route('/home')
 def home():
     if 'username' not in session:
         return redirect(url_for('login'))  # Użytkownik musi się zalogować
 
-    return render_template('home.html', username=session['username'])
+    return render_template('base.html', content_file="home_page.html", username=session['username'])
 
 
-@app.route('/products')
-def products():
-    return "Produkty"
+
+# Produkty - Konta
+@app.route('/products/accounts')
+def products_accounts():
+    return render_template('base.html', content_file='products_accounts.html')
 
 
-@app.route('/accounts')
-def accounts():
-    return "Konta"
+# Produkty - Karty
+@app.route('/products/cards')
+def products_cards():
+    return render_template('base.html', content_file='products_cards.html')
 
 
-@app.route('/cards')
-def cards():
-    return "Karty"
+# Produkty - Pożyczki
+@app.route('/products/loans')
+def products_loans():
+    return render_template('base.html', content_file='products_loans.html')
 
 
-@app.route('/loans')
-def loans():
-    return "Pożyczki"
+# Płatności - Przelew krajowy
+@app.route('/payments/domestic')
+def payments_domestic():
+    return render_template('base.html', content_file='payments_domestic.html')
 
 
-@app.route('/payments')
-def payments():
-    return "Płatności"
+# Płatności - Przelew własny
+@app.route('/payments/own')
+def payments_own():
+    return render_template('base.html', content_file='payments_own.html')
 
 
+# Płatności - Przelew zagraniczny
+@app.route('/payments/foreign')
+def payments_foreign():
+    return render_template('base.html', content_file='payments_foreign.html')
+
+
+# Oferty
 @app.route('/offers')
 def offers():
-    return "Oferty"
+    return render_template('base.html', content_file='offers.html')
 
 
+# Zarządzanie finansami
 @app.route('/financial_management')
 def financial_management():
-    return "Zarządzanie finansami"
+    return render_template('base.html', content_file='fin_man.html')
 
 
 # Wylogowanie
