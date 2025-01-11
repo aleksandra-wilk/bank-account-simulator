@@ -4,18 +4,35 @@
 
     <h2>Twoje konta</h2>
     <p>Lista posiadanych kont</p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Typ konta</th>
+                <th>Saldo</th>
+                <th>Waluta</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if accounts %}
+                {% for account in account %}
+                    <tr>
+                        <td>{{ account.account_nr }}</td>
+                        <td>{{ account.account_type }}</td>
+                        <td>{{ account.balance }}</td>
+                        <td>{{ account.currency }}</td>
+                        <td>
+                            <a href="{{ url_for('products_accounts') }}" class="btn btn-info">Szczegóły</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+            {% else %} 
+                    <tr>
+                        <td colspan="5" class="text-center">Nie posiadasz jeszcze żadnych kont</td>
+                    </tr>
+            {% endif %}
+        </tbody>
+    </table>
 
-    <form method="POST" action=""{{ url_for('products_accounts') }}>
-        <label for "account_type">Typ konta:</label>
-        <select name="account_type" required>
-            <option value="current">Current</option>
-            <option value="savings">Savings</option>
-            <option value="currency">Currency</option>
-
-        </select>
-
-
-
-    </form>
-    
 {% endblock %}

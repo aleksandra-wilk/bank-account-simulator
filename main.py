@@ -1,13 +1,19 @@
-from flask import Flask, render_template, request, redirect, url_for, session, flash
-from db.init_db import init_db
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
+from db.models import db, Client, Account, Card, Credit, Transaction
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
 
 
 def create_app():
 
     app = Flask(__name__)
-
-    # Init bazy danych 
-    init_db()
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    db = SQLAlchemy(app)
 
     # Klucz do sesji
     app.secret_key = "your_secret_key"
@@ -16,17 +22,20 @@ def create_app():
     LOGIN = "admin"
     PASSWORD = "admin"
 
+
     # Strona logowania
     @app.route('/', methods=['GET', 'POST'])
     def login():
         if request.method == 'POST':
             username = request.form.get('username')
+            client_id = request.form.get('username')
             password = request.form.get('password')
 
             # Weryfikacja użytkownika
             if username == LOGIN and password == PASSWORD:
                 # Logowanie udane - zapisanie użytkownika w sesji
                 session['username'] = username
+                session['client_id'] = client_id
                 return redirect(url_for('home'))
             else:
                 # Nieudane logowanie
@@ -46,9 +55,11 @@ def create_app():
 
 
     # Produkty - Konta
-    @app.route('/products/accounts')
+    @app.route('/products/accounts', methods=['GET'])
     def products_accounts():
-        return render_template('products_accounts.html')
+
+        accounts = db.session.query(Account).all() 
+        return render_template('products_accounts.html', accounts=accounts)
 
 
     # Produkty - Karty
@@ -100,9 +111,13 @@ def create_app():
         return redirect(url_for('login'))
     
 
-    return app
+    return app, db
 
 
 if __name__ == "__main__":
-    app = create_app()
+
+    # init_db()
+    app, db = create_app()
+    with app.app_context():  # Kontekst aplikacji jest wymagany do pracy z bazą danych
+        db.create_all() 
     app.run(debug=True)
