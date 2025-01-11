@@ -1,2 +1,21 @@
-<h2>Twoje konta</h2>
-<p>Lista posiadanych kont</p>
+{% extends "base.html" %}
+
+{% block content %}
+
+    <h2>Twoje konta</h2>
+    <p>Lista posiadanych kont</p>
+
+    <form method="POST" action=""{{ url_for('products_accounts') }}>
+        <label for "account_type">Typ konta:</label>
+        <select name="account_type" required>
+            <option value="current">Current</option>
+            <option value="savings">Savings</option>
+            <option value="currency">Currency</option>
+
+        </select>
+
+
+
+    </form>
+    
+{% endblock %}
