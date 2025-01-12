@@ -8,6 +8,7 @@ import random
 
 def create_app():
 
+
     app = Flask(__name__)
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -58,14 +59,14 @@ def create_app():
         accounts = db.session.query(Account).all() 
 
         for account in accounts:
-        # Zamiana numeru konta na string
+            # Zamiana numeru konta na string
             account.account_nr = str(account.account_nr)
-
-            # Sformatowanie numeru konta z podkreśleniami
+            # Sformatowanie numeru konta ze spacjami 
             account.account_nr = f"{account.account_nr[:2]} {account.account_nr[2:6]} {account.account_nr[6:10]} {account.account_nr[10:14]} {account.account_nr[14:18]}"
 
         return render_template('products_accounts.html', accounts=accounts)
     
+
     # Produkty - Konta
     @app.route('/products/accounts/new', methods=['GET', 'POST'])
     def create_account():
@@ -87,7 +88,6 @@ def create_app():
 
         return render_template('create_account.html')
     
-
 
     # Produkty - Karty
     @app.route('/products/cards')
