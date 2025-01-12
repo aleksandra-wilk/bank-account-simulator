@@ -48,10 +48,10 @@ class Card(db.Model):
 
 class Credit(db.Model):
     __tablename__ = 'credits'
-    credit_id = db.Column(Integer, primary_key=True)
-    account_nr = db.Column(Integer, ForeignKey('accounts.account_nr'))
-    amount = db.Column(Integer)
-    date = db.Column(DateTime)
+    credit_id = db.Column(Integer, primary_key=True, nullable=False)
+    account_nr = db.Column(Integer, ForeignKey('accounts.account_nr'), nullable=False)
+    amount = db.Column(Integer, nullable=False)
+    date = db.Column(DateTime, nullable=False, default=datetime.now)
 
     accounts = relationship('Account', back_populates='credits')
 
