@@ -1,10 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
-from db.models import Client, Account, Card, Credit, Transaction
+from db.models import db, Client, Account, Card, Credit, Transaction
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 import random
-from db.db  import db
 
 
 def create_app():

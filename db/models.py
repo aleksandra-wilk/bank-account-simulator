@@ -1,7 +1,9 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
-from db.db  import db
+
+
+db = SQLAlchemy()
 
 
 class Client(db.Model):
