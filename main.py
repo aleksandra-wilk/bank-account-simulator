@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 import random
-from sqlalchemy.orm import relationship
 from db.db  import db
 
 
