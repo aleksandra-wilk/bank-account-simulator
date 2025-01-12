@@ -1,10 +1,7 @@
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
-
-
-db = SQLAlchemy()
+from db.db  import db
 
 
 class Client(db.Model):
@@ -33,6 +30,7 @@ class Account(db.Model):
 
     def __repr__(self):
         return f"<Account(account_nr={self.account_nr}, client_id={self.client_id}, account_type={self.account_type})>"
+
 
 class Card(db.Model):
     __tablename__ = 'cards'

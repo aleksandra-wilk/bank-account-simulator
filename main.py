@@ -1,18 +1,22 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
-from db.models import db, Client, Account, Card, Credit, Transaction
+from db.models import Client, Account, Card, Credit, Transaction
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 import random
+from sqlalchemy.orm import relationship
+from db.db  import db
 
 
 def create_app():
 
 
     app = Flask(__name__)
+
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    db = SQLAlchemy(app)
+    db.init_app(app)
+    
 
     # Klucz do sesji
     app.secret_key = "your_secret_key"
@@ -143,7 +147,7 @@ def create_app():
 
 if __name__ == "__main__":
 
-    # init_db()
+
     app, db = create_app()
     with app.app_context():  # Kontekst aplikacji jest wymagany do pracy z bazą danych
         db.create_all() 
