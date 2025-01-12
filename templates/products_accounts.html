@@ -7,24 +7,20 @@
     <table class="table">
         <thead>
             <tr>
-                <th>ID</th>
+                <th>Nr konta</th>
                 <th>Typ konta</th>
                 <th>Saldo</th>
                 <th>Waluta</th>
-                <th>Akcje</th>
             </tr>
         </thead>
         <tbody>
             {% if accounts %}
-                {% for account in account %}
+                {% for account in accounts %}
                     <tr>
                         <td>{{ account.account_nr }}</td>
                         <td>{{ account.account_type }}</td>
                         <td>{{ account.balance }}</td>
                         <td>{{ account.currency }}</td>
-                        <td>
-                            <a href="{{ url_for('products_accounts') }}" class="btn btn-info">Szczegóły</a>
-                        </td>
                     </tr>
                 {% endfor %}
             {% else %} 

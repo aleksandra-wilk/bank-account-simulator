@@ -1,11 +1,9 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 from db.models import db, Client, Account, Card, Credit, Transaction
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
+import random
 
 
 def create_app():
@@ -57,9 +55,38 @@ def create_app():
     # Produkty - Konta
     @app.route('/products/accounts', methods=['GET'])
     def products_accounts():
-
         accounts = db.session.query(Account).all() 
+
+        for account in accounts:
+        # Zamiana numeru konta na string
+            account.account_nr = str(account.account_nr)
+
+            # Sformatowanie numeru konta z podkreśleniami
+            account.account_nr = f"{account.account_nr[:2]} {account.account_nr[2:6]} {account.account_nr[6:10]} {account.account_nr[10:14]} {account.account_nr[14:18]}"
+
         return render_template('products_accounts.html', accounts=accounts)
+    
+    # Produkty - Konta
+    @app.route('/products/accounts/new', methods=['GET', 'POST'])
+    def create_account():
+        if request.method == 'POST':
+            new_account = Account(
+                account_nr = random.randint(15_0909_6666_0000_0000, 15_0909_6666_9999_9999),
+                client_id = session['client_id'],
+                card_nr = random.randint(9999_6666_0000_0000, 9999_6666_9999_9999),
+                account_type = request.form.get('account_type'),
+                balance = 0,
+                currency = 'PLN'
+            )
+
+            db.session.add(new_account)
+            db.session.commit()
+            print("Dodano nowe konto")
+
+            return render_template('create_account.html', message="Konto założono pomyślnie.")
+
+        return render_template('create_account.html')
+    
 
 
     # Produkty - Karty

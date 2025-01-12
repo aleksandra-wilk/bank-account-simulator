@@ -17,19 +17,22 @@ class Client(db.Model):
 
     accounts = relationship('Account', back_populates='clients')
 
+
 class Account(db.Model):
     __tablename__ = 'accounts'
     account_nr = db.Column(Integer, primary_key=True, nullable=False)
     client_id = db.Column(Integer, ForeignKey('clients.client_id'), nullable=False)
     card_nr = db.Column(Integer)
     account_type = db.Column(String, nullable=False)
-    balance = db.Column(Integer, nullable=False)
+    balance = db.Column(Integer, default=0)
     currency = db.Column(String, nullable=False)
 
     clients = relationship('Client', back_populates='accounts')
     transactions = relationship('Transaction', back_populates='accounts')
     credits = relationship('Credit', back_populates='accounts')
 
+    def __repr__(self):
+        return f"<Account(account_nr={self.account_nr}, client_id={self.client_id}, account_type={self.account_type})>"
 
 class Card(db.Model):
     __tablename__ = 'cards'
