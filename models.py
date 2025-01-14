@@ -2,9 +2,7 @@ from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-
-
-db = SQLAlchemy()
+from app import app, db
 
 
 class Client(db.Model):
@@ -67,6 +65,13 @@ class Transaction(db.Model):
     receiver_account = db.Column(Integer, nullable=False)
 
     accounts = relationship('Account', back_populates='transactions')
+    
+
+if __name__ == "__main__":
+    with app.app_context():
+        print("Creating database tables...")
+        db.create_all()
+        print("Done")
 
 
 
