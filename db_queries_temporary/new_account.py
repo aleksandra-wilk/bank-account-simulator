@@ -1,5 +1,5 @@
 from flask import Flask
-from db.models import Client, Account, Card, Credit, Transaction
+from models import Client, Account, Card, Credit, Transaction
 from flask_sqlalchemy import SQLAlchemy
 import random
 
