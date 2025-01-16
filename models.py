@@ -16,6 +16,9 @@ class Client(db.Model):
 
     accounts = relationship('Account', back_populates='clients')
 
+    def __repr__(self):
+        return f"<Client(client_id={self.client_id}, name={self.name}, surname={self.surname}, email={self.email}, password={self.password})>"
+
 
 class Account(db.Model):
     __tablename__ = 'accounts'
@@ -32,8 +35,7 @@ class Account(db.Model):
     cards = relationship('Card', back_populates='accounts')
 
     def __repr__(self):
-        return f"<Account(account_nr={self.account_nr}, client_id={self.client_id}, account_type={self.account_type})>"
-
+        return f"<Account(account_nr={self.account_nr}, client_id={self.client_id}, account_type={self.account_type}),balance={self.balance}, currency={self.currency}>"
 
 class Card(db.Model):
     __tablename__ = 'cards'
@@ -44,6 +46,9 @@ class Card(db.Model):
 
     accounts = relationship('Account', back_populates='cards')
 
+    def __repr__(self):
+        return f"<Card(card_nr={self.card_nr}, account_nr={self.account_nr}, balance={self.balance}, currency={self.currency}>"
+
 
 class Credit(db.Model):
     __tablename__ = 'credits'
@@ -53,6 +58,9 @@ class Credit(db.Model):
     date = db.Column(DateTime, nullable=False, default=datetime.now)
 
     accounts = relationship('Account', back_populates='credits')
+
+    def __repr__(self):
+        return f"<Credit(credit_id={self.credit_id}, account_nr={self.account_nr}, amount={self.amount}, date={self.date})>"
 
 
 class Transaction(db.Model):
@@ -66,6 +74,9 @@ class Transaction(db.Model):
     receiver_account = db.Column(Integer, nullable=False)
 
     accounts = relationship('Account', back_populates='transactions')
+
+    def __repr__(self):
+        return f"<Transaction(account_nr={self.account_nr}, amount={self.amount}, currency={self.currency}, date={self.date}, receiver_name={self.receiver_name}, receiver_account={self.receiver_account}>"
     
 
 def create_account_db(account_type, client_id):
@@ -133,7 +144,8 @@ def create_client_db(name, surname, email,password):
 
 def create_credit_db(account_nr, amount):
     
-    new_credit = Transaction(
+    new_credit = Credit(
+        credit_id = random.randint(10000, 99999),
         account_nr = account_nr,
         amount = amount,
     )
