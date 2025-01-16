@@ -2,9 +2,11 @@
 
 {% block content %}
 
-    <h2>Twoje konta</h2>
-    <p>Lista posiadanych kont</p>
-    <table class="table">
+<div class="container mt-4">
+    <h2 class="mb-4">Twoje konta</h2>
+    <p class="mb-4">Lista posiadanych kont</p>
+    
+    <table class="table table-striped">
         <thead>
             <tr>
                 <th>Nr konta</th>
@@ -16,19 +18,20 @@
         <tbody>
             {% if accounts %}
                 {% for account in accounts %}
-                    <tr>
-                        <td>{{ account.account_nr }}</td>
-                        <td>{{ account.account_type }}</td>
-                        <td>{{ account.balance }}</td>
-                        <td>{{ account.currency }}</td>
-                    </tr>
+                <tr>
+                    <td>{{ account.account_nr }}</td>
+                    <td>{{ account.account_type }}</td>
+                    <td>{{ account.balance }}</td>
+                    <td>{{ account.currency }}</td>
+                </tr>
                 {% endfor %}
-            {% else %} 
-                    <tr>
-                        <td colspan="5" class="text-center">Nie posiadasz jeszcze żadnych kont</td>
-                    </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" class="text-center">Nie posiadasz jeszcze żadnych kont</td>
+            </tr>
             {% endif %}
         </tbody>
     </table>
+</div>
 
 {% endblock %}

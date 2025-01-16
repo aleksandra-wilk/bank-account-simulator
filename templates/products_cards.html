@@ -1,8 +1,38 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="container mt-4">    
+    <h2 class="mb-4">Twoje karty</h2>
+    <p class="mb-4">Dostępne karty</p>
 
-    <h2>Twoje karty</h2>
-    <p>Dostępne karty</p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nr konta</th>
+                <th>Typ konta</th>
+                <th>Saldo</th>
+                <th>Waluta</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if cards %}
+                {% for card in cards %}
+                <tr>
+                    <td>{{ card.account_nr }}</td>
+                    <td>{{ card.account_type }}</td>
+                    <td>{{ card.balance }}</td>
+                    <td>{{ card.currency }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="4" class="text-center">Nie posiadasz jeszcze żadnych kart</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+
 
 {% endblock %}

@@ -2,7 +2,13 @@
 
 {% block content %}
 
-<div class="container mt-5">
+{% if message %}
+<div class="alert alert-success" style="width: 300px;">
+    {{ message }}
+</div>
+{% endif %}
+
+<div class="container mt-4">
     <h2 class="mb-4">Załóż nowe konto</h2>
     <form id="createAccountForm" method="POST" action="{{ url_for('create_account') }}">
         <div class="form-group">
