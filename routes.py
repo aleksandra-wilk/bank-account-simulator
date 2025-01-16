@@ -1,6 +1,6 @@
 from flask import redirect, render_template, request, session, url_for, flash
-from app import app
-from models import db, Client, Account, Card, Credit, Transaction
+from app import app, db
+from models import Client, Account, create_account_db, Card, Credit, Transaction
 import random
 
 # Strona logowania
@@ -58,28 +58,28 @@ def products_accounts():
 @app.route('/products/accounts/new', methods=['GET', 'POST'])
 def create_account():
     if request.method == 'POST':
-        new_account = Account(
-            account_nr = random.randint(15_0909_6666_0000_0000, 15_0909_6666_9999_9999),
-            client_id = session['client_id'],
-            card_nr = random.randint(9999_6666_0000_0000, 9999_6666_9999_9999),
-            account_type = request.form.get('account_type'),
-            balance = 0,
-            currency = 'PLN'
-        )
+        
+        account_type = request.form.get('account_type')
+        client_id = session.get('client_id')
+        
+        new_account = create_account_db(account_type=account_type, client_id=client_id)
 
         db.session.add(new_account)
         db.session.commit()
-        print("Dodano nowe konto")
 
-        return render_template('create_account.html', message="Konto założono pomyślnie.")
+        return render_template('create_account.html', message="Konto założono pomyślnie."), 201
 
-    return render_template('create_account.html')
+    elif request.method == 'GET':
+        return render_template('create_account.html')
 
 
 # Produkty - Karty
 @app.route('/products/cards')
 def products_cards():
-    return render_template('products_cards.html')
+
+    cards = db.session.query(Card).all()
+
+    return render_template('products_cards.html', cards=cards)
 
 
 # Produkty - Pożyczki

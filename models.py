@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from app import app, db
+import random
 
 
 class Client(db.Model):
@@ -57,7 +58,7 @@ class Credit(db.Model):
 class Transaction(db.Model):
     __tablename__ = 'transactions'
     transaction_id = db.Column(Integer, primary_key=True, nullable=False)
-    account_id = db.Column(Integer, ForeignKey('accounts.account_nr'), nullable=False)
+    account_nr = db.Column(Integer, ForeignKey('accounts.account_nr'), nullable=False)
     amount = db.Column(Integer, nullable=False)
     currency = db.Column(String, nullable=False)
     date = db.Column(DateTime, nullable=False, default=datetime.now)
@@ -66,6 +67,98 @@ class Transaction(db.Model):
 
     accounts = relationship('Account', back_populates='transactions')
     
+
+def create_account_db(account_type, client_id):
+    
+    if account_type == 'currency_eur':
+        currency = 'EUR'
+    elif account_type == 'currency_usd':
+        currency = 'USD'
+    else:
+        currency = 'PLN'
+    
+    new_account = Account(
+        account_nr = random.randint(15_0909_6666_0000_0000, 15_0909_6666_9999_9999),
+        client_id = client_id,
+        card_nr = random.randint(9999_6666_0000_0000, 9999_6666_9999_9999),
+        account_type = account_type,
+        balance = 0,
+        currency = currency
+    )
+    
+    db.session.add(new_account)
+    db.session.commit()
+    
+    return new_account
+
+
+def create_card_db(account_nr, balance):
+    
+    account_type = 'x' #tu to wyszukanie
+    
+    if account_type == 'currency_eur':
+        currency = 'EUR'
+    elif account_type == 'currency_usd':
+        currency = 'USD'
+    else:
+        currency = 'PLN'
+    
+    new_card = Card(
+        card_nr = random.randint(15_0909_0000_0000, 15_0909_9999_9999),
+        account_nr = account_nr,
+        balance = 0, # wpisac wyszukanie do bd odnosnie balansu z numerem konta
+        currency = 'PLN', # wpisac wyszukanie do bd odnosnie type z numerem konta
+    )
+    
+    db.session.add(new_card)
+    db.session.commit()
+    
+    return new_card
+
+
+def create_client_db(name, surname, email,password):
+    
+    new_client = Client(
+            name = name,
+            surname = surname,
+            email = email,
+            password = password,
+    )
+    
+    db.session.add(new_client)
+    db.session.commit()
+    
+    return new_client
+
+
+def create_credit_db(account_nr, amount):
+    
+    new_credit = Transaction(
+        account_nr = account_nr,
+        amount = amount,
+    )
+    
+    db.session.add(new_credit)
+    db.session.commit()
+    
+    return new_credit
+
+
+def create_transaction_db(account_nr, amount, currency, receiver_name, receiver_account):
+    
+    new_transaction = Transaction(
+        account_nr = account_nr,
+        amount = amount,
+        currency = currency,
+        receiver_name = receiver_name,
+        receiver_account = receiver_account,
+    )
+    
+    db.session.add(new_transaction)
+    db.session.commit()
+    
+    return new_transaction
+
 
 if __name__ == "__main__":
     with app.app_context():
