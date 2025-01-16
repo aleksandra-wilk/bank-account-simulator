@@ -69,7 +69,7 @@ class Transaction(db.Model):
     account_nr = db.Column(Integer, ForeignKey('accounts.account_nr'), nullable=False)
     amount = db.Column(Integer, nullable=False)
     currency = db.Column(String, nullable=False)
-    date = db.Column(DateTime, nullable=False, default=datetime.now)
+    date = db.Column(DateTime, nullable=False, default=datetime.now().date)
     receiver_name = db.Column(String, nullable=False)
     receiver_account = db.Column(Integer, nullable=False)
 
@@ -91,7 +91,7 @@ def create_account_db(account_type, client_id):
     new_account = Account(
         account_nr = random.randint(15_0909_6666_0000_0000, 15_0909_6666_9999_9999),
         client_id = client_id,
-        card_nr = random.randint(9999_6666_0000_0000, 9999_6666_9999_9999),
+        card_nr = 0,
         account_type = account_type,
         balance = 0,
         currency = currency
@@ -115,7 +115,7 @@ def create_card_db(account_nr, balance):
         currency = 'PLN'
     
     new_card = Card(
-        card_nr = random.randint(15_0909_0000_0000, 15_0909_9999_9999),
+        card_nr = random.randint(1155_0900_0000_0000, 1155_0900_9999_9999),
         account_nr = account_nr,
         balance = 0, # wpisac wyszukanie do bd odnosnie balansu z numerem konta
         currency = 'PLN', # wpisac wyszukanie do bd odnosnie type z numerem konta

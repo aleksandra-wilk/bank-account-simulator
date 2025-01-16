@@ -10,19 +10,25 @@ from models import Client, Account, Card, Credit, Transaction
 from models import create_account_db, create_card_db, create_client_db, create_credit_db, create_transaction_db
 from flask_sqlalchemy import SQLAlchemy
 from app import db, app
+import random
 
 
-choice = input("""DODAĆ DO TABELI - WYBIERZ 1 
-WYŚWIETLIĆ TABELE - WYBIERZ 2\n""")
+choice = input("""
+    CO CHCESZ ZROBIĆ?
+    DODAĆ DO TABELI - WYBIERZ 1
+    WYŚWIETLIĆ TABELE - WYBIERZ 2 \n
+               """)
 
 if choice == '1': 
 
-    choice2 = input ("""CO CHCESZ DODAĆ? 
-1 - NOWY KLIENT
-2 - NOWE KONTO 
-3 - NOWA KARTA 
-4 - NOWY KREDYT
-5 - NOWA TRANSAKCJA\n""")
+    choice2 = input ("""
+    CO CHCESZ DODAĆ? 
+    1 - NOWY KLIENT
+    2 - NOWE KONTO 
+    3 - NOWA KARTA 
+    4 - NOWY KREDYT
+    5 - NOWA TRANSAKCJA \n
+                     """)
     
     if choice2 == '1': 
 
@@ -32,7 +38,7 @@ if choice == '1':
             clients = db.session.query(Client).all()
 
             print("DODANO NOWEGO KLIENTA")
-            print(f"WSZYSCY KLIENCI: {clients}")
+            print(f"WSZYSCY KLIENCI: \n{clients}")
 
     elif choice2 == '2': 
 
@@ -42,27 +48,29 @@ if choice == '1':
             accounts = db.session.query(Credit).all()
 
             print("DODANO NOWE KONTO")
-            print(f"WSZYSTKIE KONTA: {accounts}")
+            print(f"WSZYSTKIE KONTA: \n{accounts}")
 
     elif choice2 == '3': # Dokończyć
 
         with app.app_context():
     
-            create_card_db(345678, 0)
+            random_account = random.randint(15_0909_6666_0000_0000, 15_0909_6666_9999_9999)
+            
+            create_card_db(random_account, 0)
             cards = db.session.query(Card).all()
 
             print("DODANO NOWĄ KARTĘ""")
-            print(f"WSZYSTKIE KARTY: {cards}")
+            print(f"WSZYSTKIE KARTY: \n{cards}")
 
     elif choice2 == '4': 
 
         with app.app_context():
     
-            create_credit_db(2345678, 70_000)
+            create_credit_db(11_1160_8800_8977_2456, 70_000)
             credits = db.session.query(Credit).all()
 
             print("DODANO NOWY KREDYT""")
-            print(f"WSZYSTKIE KREDTY: {credits}")
+            print(f"WSZYSTKIE KREDTY: \n{credits}")
 
     elif choice2 == '5': 
 
@@ -72,7 +80,7 @@ if choice == '1':
             transactions = db.session.query(Transaction).all()
 
             print("DODANO NOWĄ TRANSAKCJĘ""")
-            print(f"WSZYSTKIE TRANSAKCJE: {transactions}")
+            print(f"WSZYSTKIE TRANSAKCJE: \n{transactions}")
 
 elif choice == '2':
 
@@ -90,21 +98,21 @@ elif choice == '2':
     
 
             clients = db.session.query(Client).all()
-            print(f"WSZYSCY KLIENCI: {clients}")
+            print(f"WSZYSCY KLIENCI: \n{clients}")
 
     elif choice2 == '2': 
 
         with app.app_context():
     
             accounts = db.session.query(Credit).all()
-            print(f"WSZYSTKIE KONTA: {accounts}")
+            print(f"WSZYSTKIE KONTA: \n{accounts}")
 
     elif choice2 == '3': 
 
         with app.app_context():
     
             cards = db.session.query(Card).all()
-            print(f"WSZYSTKIE KARTY: {cards}")
+            print(f"WSZYSTKIE KARTY: \n{cards}")
 
     elif choice2 == '4': 
 
@@ -112,13 +120,13 @@ elif choice == '2':
     
 
             credits = db.session.query(Credit).all()
-            print(f"WSZYSTKIE KREDTY: {credits}")
+            print(f"WSZYSTKIE KREDTY: \n{credits}")
 
     elif choice2 == '5': 
 
         with app.app_context():
     
             transactions = db.session.query(Transaction).all()
-            print(f"WSZYSTKIE TRANSAKCJE: {transactions}")
+            print(f"WSZYSTKIE TRANSAKCJE: \n{transactions}")
 
      

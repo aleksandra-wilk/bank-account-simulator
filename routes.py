@@ -46,9 +46,7 @@ def products_accounts():
     accounts = db.session.query(Account).all() 
 
     for account in accounts:
-        # Zamiana numeru konta na string
         account.account_nr = str(account.account_nr)
-        # Sformatowanie numeru konta ze spacjami 
         account.account_nr = f"{account.account_nr[:2]} {account.account_nr[2:6]} {account.account_nr[6:10]} {account.account_nr[10:14]} {account.account_nr[14:18]}"
 
     return render_template('products_accounts.html', accounts=accounts)
@@ -79,6 +77,14 @@ def products_cards():
 
     cards = db.session.query(Card).all()
 
+    for card in cards:
+        card.account_nr = str(card.account_nr)
+        card.account_nr = f"{card.account_nr[:2]} {card.account_nr[2:6]} {card.account_nr[6:10]} {card.account_nr[10:14]} {card.account_nr[14:18]}"
+
+        card.card_nr = str(card.card_nr)
+        card.card_nr = f"{card.card_nr[:4]} {card.card_nr[4:8]} {card.card_nr[8:12]} {card.card_nr[12:16]}"
+
+
     return render_template('products_cards.html', cards=cards)
 
 
@@ -87,6 +93,10 @@ def products_cards():
 def products_loans():
 
     credits = db.session.query(Credit).all()
+
+    for credit in credits:
+        credit.account_nr = str(credit.account_nr)
+        credit.account_nr = f"{credit.account_nr[:2]} {credit.account_nr[2:6]} {credit.account_nr[6:10]} {credit.account_nr[10:14]} {credit.account_nr[14:18]}"
 
     return render_template('products_loans.html', credits=credits)
 
