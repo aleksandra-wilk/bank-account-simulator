@@ -1,10 +1,42 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Twoje pożyczki</h2>
-    <p class="mb-4">Skorzystaj z pożyczki</p>
-</div>
 
+<div class="container mt-4">    
+
+    <h2 class="mb-4">Twoje kredyty</h2>
+    <p class="mb-4">Dostępne kredyty</p>
+
+    <table class="table table-striped">
+
+        <thead>
+            <tr>
+                <th>Nr kredytu</th>
+                <th>Konto kredytowe</th>
+                <th>Saldo do spłaty</th>
+                <th>Data otwarcia</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% if credits %}
+                {% for credit in credits %}
+                <tr>
+                    <td>{{ credit.credit_id }}</td>
+                    <td>{{ credit.account_nr }}</td>
+                    <td>{{ credit.amount }}</td>
+                    <td>{{ credit.date }}</td>
+                </tr>
+                {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="4" class="text-center">Nie posiadasz jeszcze żadnych kredytów</td>
+            </tr>
+            {% endif %}
+        </tbody>
+
+    </table>
+
+</div>
 
 {% endblock %}

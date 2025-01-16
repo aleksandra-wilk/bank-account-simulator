@@ -3,10 +3,12 @@
 {% block content %}
 
 <div class="container mt-4">
+
     <h2 class="mb-4">Twoje konta</h2>
     <p class="mb-4">Lista posiadanych kont</p>
     
     <table class="table table-striped">
+
         <thead>
             <tr>
                 <th>Nr konta</th>
@@ -15,6 +17,7 @@
                 <th>Waluta</th>
             </tr>
         </thead>
+
         <tbody>
             {% if accounts %}
                 {% for account in accounts %}
@@ -31,7 +34,9 @@
             </tr>
             {% endif %}
         </tbody>
+
     </table>
+    
 </div>
 
 {% endblock %}
