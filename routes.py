@@ -85,7 +85,10 @@ def products_cards():
 # Produkty - Pożyczki
 @app.route('/products/loans')
 def products_loans():
-    return render_template('products_loans.html')
+
+    credits = db.session.query(Credit).all()
+
+    return render_template('products_loans.html', credits=credits)
 
 
 # Płatności - Przelew krajowy
