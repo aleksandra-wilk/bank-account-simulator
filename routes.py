@@ -70,9 +70,9 @@ def create_account():
         card_nr = None
         if want_card:
             card_nr = random.randint(1155_0900_0000_0000, 1155_0900_9999_9999)
-
+            
         new_account = create_account_db(account_type, client_id, card_nr)
-
+        
         db.session.add(new_account)
         db.session.commit()
 
@@ -109,11 +109,10 @@ def create_card():
 
         account = db.session.query(Account).filter(Account.account_nr == account_nr).first()
 
-        if account:  # Dodajemy sprawdzenie, czy konto zostało znalezione
+        if account:  
             account_type = account.account_type
             balance = account.balance
 
-            # Tworzymy kartę
             new_card = create_card_db(account_nr, account_type, balance)
             db.session.add(new_card)
             db.session.commit()

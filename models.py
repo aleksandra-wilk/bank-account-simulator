@@ -88,14 +88,21 @@ def create_account_db(account_type, client_id, card_nr):
     else:
         currency = 'PLN'
     
+    random_account = random.randint(15_0909_6666_0000_0000, 15_0909_6666_9999_9999)
+
     new_account = Account(
-        account_nr = random.randint(15_0909_6666_0000_0000, 15_0909_6666_9999_9999),
+        account_nr = random_account,
         client_id = client_id,
         card_nr = card_nr,
         account_type = account_type,
         balance = 0,
         currency = currency
     )
+
+    if card_nr != None: 
+        new_card = create_card_db(random_account, account_type, balance=0)
+        db.session.add(new_card)
+        db.session.commit()
     
     db.session.add(new_account)
     db.session.commit()
