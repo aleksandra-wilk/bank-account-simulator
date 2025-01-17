@@ -56,7 +56,7 @@ if choice == '1':
     
             random_account = random.randint(15_0909_6666_0000_0000, 15_0909_6666_9999_9999)
             
-            create_card_db(random_account, 0)
+            create_card_db(random_account, 'current', 0)
             cards = db.session.query(Card).all()
 
             print("DODANO NOWĄ KARTĘ""")

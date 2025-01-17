@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
 
 
 app = Flask(__name__)
@@ -9,6 +10,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy()
 db.init_app(app)
+migrate = Migrate(app, db)
 
 
 # Klucz do sesji

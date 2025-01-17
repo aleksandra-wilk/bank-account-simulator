@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if message %}
+<div class="alert alert-success" style="width: 300px;">
+    {{ message }}
+</div>
+{% endif %}
+
+<div class="container mt-4">
+
+    <h2 class="mb-4">Załóż nową kartę</h2>
+    <p class="mb-3">Lista kont bez istniejącej karty</p>
+
+    {% if accounts %}
+        <div class="list-group">
+            {% for account in accounts %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Konto nr:</strong> {{ account.account_nr }} <br>
+                    </div>
+                    <form method="POST" action="{{ url_for('create_card') }}" class="mb-0">
+                        <input type="hidden" name="account_nr" value="{{ account.account_nr }}">
+                        <button type="submit" class="btn btn-primary">Załóż kartę</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </div>
+
+    {% else %}
+        <div class="alert alert-warning" role="alert">
+            Brak dostępnych kont do utworzenia karty.
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

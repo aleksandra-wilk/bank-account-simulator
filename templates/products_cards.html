@@ -11,8 +11,8 @@
 
         <thead>
             <tr>
-                <th>Nr konta</th>
-                <th>Typ konta</th>
+                <th>Nr karty</th>
+                <th>Nr konta do karty</th>
                 <th>Saldo</th>
                 <th>Waluta</th>
             </tr>
@@ -22,8 +22,8 @@
             {% if cards %}
                 {% for card in cards %}
                 <tr>
+                    <td>{{ card.card_nr }}</td>
                     <td>{{ card.account_nr }}</td>
-                    <td>{{ card.account_type }}</td>
                     <td>{{ card.balance }}</td>
                     <td>{{ card.currency }}</td>
                 </tr>

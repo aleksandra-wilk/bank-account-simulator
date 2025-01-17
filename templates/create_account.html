@@ -3,11 +3,9 @@
 {% block content %}
 
 {% if message %}
-
 <div class="alert alert-success" style="width: 300px;">
     {{ message }}
 </div>
-
 {% endif %}
 
 <div class="container mt-4">
@@ -24,6 +22,11 @@
                 <option value="currency_eur">Konto walutowe w EUR</option>
                 <option value="currency_usd">Konto walutowe w USD</option>
             </select>
+        </div>
+
+        <div class="form-check mt-3">
+            <input type="checkbox" class="form-check-input" id="want_card" name="want_card">
+            <label class="form-check-label" for="want_card">Chcę założyć kartę do konta</label>
         </div>
         
         <div class="mt-4">

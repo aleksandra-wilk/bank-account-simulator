@@ -24,7 +24,7 @@ class Account(db.Model):
     __tablename__ = 'accounts'
     account_nr = db.Column(Integer, primary_key=True, nullable=False)
     client_id = db.Column(Integer, ForeignKey('clients.client_id'), nullable=False)
-    card_nr = db.Column(Integer)
+    card_nr = db.Column(Integer, nullable=True)
     account_type = db.Column(String, nullable=False)
     balance = db.Column(Integer, default=0)
     currency = db.Column(String, nullable=False)
@@ -35,7 +35,7 @@ class Account(db.Model):
     cards = relationship('Card', back_populates='accounts')
 
     def __repr__(self):
-        return f"<Account(account_nr={self.account_nr}, client_id={self.client_id}, account_type={self.account_type}),balance={self.balance}, currency={self.currency}>"
+        return f"<Account(account_nr={self.account_nr}, client_id={self.client_id}, card_nr={self.card_nr}, account_type={self.account_type}),balance={self.balance}, currency={self.currency}>"
 
 class Card(db.Model):
     __tablename__ = 'cards'
@@ -79,7 +79,7 @@ class Transaction(db.Model):
         return f"<Transaction(account_nr={self.account_nr}, amount={self.amount}, currency={self.currency}, date={self.date}, receiver_name={self.receiver_name}, receiver_account={self.receiver_account}>"
     
 
-def create_account_db(account_type, client_id):
+def create_account_db(account_type, client_id, card_nr):
     
     if account_type == 'currency_eur':
         currency = 'EUR'
@@ -91,7 +91,7 @@ def create_account_db(account_type, client_id):
     new_account = Account(
         account_nr = random.randint(15_0909_6666_0000_0000, 15_0909_6666_9999_9999),
         client_id = client_id,
-        card_nr = 0,
+        card_nr = card_nr,
         account_type = account_type,
         balance = 0,
         currency = currency
@@ -103,9 +103,9 @@ def create_account_db(account_type, client_id):
     return new_account
 
 
-def create_card_db(account_nr, balance):
+def create_card_db(account_nr, account_type, balance):
     
-    account_type = 'x' #tu to wyszukanie
+    account_type = account_type
     
     if account_type == 'currency_eur':
         currency = 'EUR'
@@ -117,12 +117,17 @@ def create_card_db(account_nr, balance):
     new_card = Card(
         card_nr = random.randint(1155_0900_0000_0000, 1155_0900_9999_9999),
         account_nr = account_nr,
-        balance = 0, # wpisac wyszukanie do bd odnosnie balansu z numerem konta
-        currency = 'PLN', # wpisac wyszukanie do bd odnosnie type z numerem konta
+        balance = balance,
+        currency = currency, 
     )
     
     db.session.add(new_card)
     db.session.commit()
+
+    account = Account.query.filter(Account.account_nr == account_nr).first()
+    if account:
+        account.card_nr = new_card.card_nr
+        db.session.commit()
     
     return new_card
 
