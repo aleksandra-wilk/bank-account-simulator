@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Kalkulator pożyczki</h1>
+    <form method="POST" action="{{ url_for('loan') }}">
+        <div class="form-group">
+            <label for="amount">Kwota pożyczki (PLN)</label>
+            <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
+        </div>
+        <div class="form-group">
+            <label for="months">Liczba miesięcy</label>
+            <input type="number" class="form-control" id="months" name="months" required>
+        </div>
+        <div class="form-check mt-3">
+            <input type="checkbox" class="form-check-input" id="insurance" name="insurance">
+            <label class="form-check-label" for="insurance">Ubezpieczenie</label>
+        </div>
+        <button type="submit" class="btn btn-success mt-4">Oblicz</button>
+    </form>
+</div>
+{% endblock %}
