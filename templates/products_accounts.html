@@ -3,24 +3,45 @@
 {% block content %}
 
 <div class="container mt-4">
+
     <h2 class="mb-4">Twoje konta</h2>
     <p class="mb-4">Lista posiadanych kont</p>
     
-    <table class="table table-striped">
+    <table class="table table-striped table-hover w-100">
+
         <thead>
             <tr>
                 <th>Nr konta</th>
                 <th>Typ konta</th>
+                <th>Nr karty</th>
                 <th>Saldo</th>
                 <th>Waluta</th>
             </tr>
         </thead>
+
         <tbody>
             {% if accounts %}
                 {% for account in accounts %}
                 <tr>
                     <td>{{ account.account_nr }}</td>
-                    <td>{{ account.account_type }}</td>
+                    <td>
+                        {% if account.account_type == 'current' %}
+                            Konto bieżące
+                        {% elif account.account_type == 'savings' %}
+                            Konto oszczędnościowe
+                        {% elif account.account_type == 'currency_eur' %}
+                            Konto walutowe EUR
+                        {% elif account.account_type == 'currency_usd' %}
+                            Konto walutowe USD
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if account.card_nr is none %}
+                            Brak karty
+                        {% else %}
+                            {{ account.card_nr }}
+                        {% endif %}
+                    </td>
                     <td>{{ account.balance }}</td>
                     <td>{{ account.currency }}</td>
                 </tr>
@@ -31,7 +52,9 @@
             </tr>
             {% endif %}
         </tbody>
+
     </table>
+    
 </div>
 
 {% endblock %}

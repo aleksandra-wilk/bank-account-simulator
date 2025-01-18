@@ -1,26 +1,29 @@
 {% extends "base.html" %}
 
 {% block content %}
+
 <div class="container mt-4">    
+
     <h2 class="mb-4">Twoje karty</h2>
     <p class="mb-4">Dostępne karty</p>
 
-
     <table class="table table-striped">
+
         <thead>
             <tr>
-                <th>Nr konta</th>
-                <th>Typ konta</th>
+                <th>Nr karty</th>
+                <th>Nr konta do karty</th>
                 <th>Saldo</th>
                 <th>Waluta</th>
             </tr>
         </thead>
+
         <tbody>
             {% if cards %}
                 {% for card in cards %}
                 <tr>
+                    <td>{{ card.card_nr }}</td>
                     <td>{{ card.account_nr }}</td>
-                    <td>{{ card.account_type }}</td>
                     <td>{{ card.balance }}</td>
                     <td>{{ card.currency }}</td>
                 </tr>
@@ -31,8 +34,9 @@
             </tr>
             {% endif %}
         </tbody>
-    </table>
-</div>
 
+    </table>
+
+</div>
 
 {% endblock %}

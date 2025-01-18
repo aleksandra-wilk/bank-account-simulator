@@ -16,12 +16,15 @@ class Client(db.Model):
 
     accounts = relationship('Account', back_populates='clients')
 
+    def __repr__(self):
+        return f"<Client(client_id={self.client_id}, name={self.name}, surname={self.surname}, email={self.email}, password={self.password})>"
+
 
 class Account(db.Model):
     __tablename__ = 'accounts'
     account_nr = db.Column(Integer, primary_key=True, nullable=False)
     client_id = db.Column(Integer, ForeignKey('clients.client_id'), nullable=False)
-    card_nr = db.Column(Integer)
+    card_nr = db.Column(Integer, nullable=True)
     account_type = db.Column(String, nullable=False)
     balance = db.Column(Integer, default=0)
     currency = db.Column(String, nullable=False)
@@ -32,8 +35,7 @@ class Account(db.Model):
     cards = relationship('Card', back_populates='accounts')
 
     def __repr__(self):
-        return f"<Account(account_nr={self.account_nr}, client_id={self.client_id}, account_type={self.account_type})>"
-
+        return f"<Account(account_nr={self.account_nr}, client_id={self.client_id}, card_nr={self.card_nr}, account_type={self.account_type}),balance={self.balance}, currency={self.currency}>"
 
 class Card(db.Model):
     __tablename__ = 'cards'
@@ -43,6 +45,9 @@ class Card(db.Model):
     currency = db.Column(String, nullable=False)
 
     accounts = relationship('Account', back_populates='cards')
+
+    def __repr__(self):
+        return f"<Card(card_nr={self.card_nr}, account_nr={self.account_nr}, balance={self.balance}, currency={self.currency}>"
 
 
 class Credit(db.Model):
@@ -54,6 +59,9 @@ class Credit(db.Model):
 
     accounts = relationship('Account', back_populates='credits')
 
+    def __repr__(self):
+        return f"<Credit(credit_id={self.credit_id}, account_nr={self.account_nr}, amount={self.amount}, date={self.date})>"
+
 
 class Transaction(db.Model):
     __tablename__ = 'transactions'
@@ -61,15 +69,18 @@ class Transaction(db.Model):
     account_nr = db.Column(Integer, ForeignKey('accounts.account_nr'), nullable=False)
     amount = db.Column(Integer, nullable=False)
     currency = db.Column(String, nullable=False)
-    date = db.Column(DateTime, nullable=False, default=datetime.now)
+    date = db.Column(DateTime, nullable=False, default=datetime.now().date)
     receiver_name = db.Column(String, nullable=False)
     receiver_account = db.Column(Integer, nullable=False)
     transfer_title = db.Column(String, nullable=False)
 
     accounts = relationship('Account', back_populates='transactions')
+
+    def __repr__(self):
+        return f"<Transaction(account_nr={self.account_nr}, amount={self.amount}, currency={self.currency}, date={self.date}, receiver_name={self.receiver_name}, receiver_account={self.receiver_account}>"
     
 
-def create_account_db(account_type, client_id):
+def create_account_db(account_type, client_id, card_nr):
     
     if account_type == 'currency_eur':
         currency = 'EUR'
@@ -78,14 +89,21 @@ def create_account_db(account_type, client_id):
     else:
         currency = 'PLN'
     
+    random_account = random.randint(15_0909_6666_0000_0000, 15_0909_6666_9999_9999)
+
     new_account = Account(
-        account_nr = random.randint(15_0909_6666_0000_0000, 15_0909_6666_9999_9999),
+        account_nr = random_account,
         client_id = client_id,
-        card_nr = random.randint(9999_6666_0000_0000, 9999_6666_9999_9999),
+        card_nr = card_nr,
         account_type = account_type,
         balance = 0,
         currency = currency
     )
+
+    if card_nr != None: 
+        new_card = create_card_db(random_account, account_type, balance=0)
+        db.session.add(new_card)
+        db.session.commit()
     
     db.session.add(new_account)
     db.session.commit()
@@ -93,9 +111,9 @@ def create_account_db(account_type, client_id):
     return new_account
 
 
-def create_card_db(account_nr, balance):
+def create_card_db(account_nr, account_type, balance):
     
-    account_type = 'x' #tu to wyszukanie
+    account_type = account_type
     
     if account_type == 'currency_eur':
         currency = 'EUR'
@@ -105,14 +123,19 @@ def create_card_db(account_nr, balance):
         currency = 'PLN'
     
     new_card = Card(
-        card_nr = random.randint(15_0909_0000_0000, 15_0909_9999_9999),
+        card_nr = random.randint(1155_0900_0000_0000, 1155_0900_9999_9999),
         account_nr = account_nr,
-        balance = 0, # wpisac wyszukanie do bd odnosnie balansu z numerem konta
-        currency = 'PLN', # wpisac wyszukanie do bd odnosnie type z numerem konta
+        balance = balance,
+        currency = currency, 
     )
     
     db.session.add(new_card)
     db.session.commit()
+
+    account = Account.query.filter(Account.account_nr == account_nr).first()
+    if account:
+        account.card_nr = new_card.card_nr
+        db.session.commit()
     
     return new_card
 
@@ -134,7 +157,8 @@ def create_client_db(name, surname, email,password):
 
 def create_credit_db(account_nr, amount):
     
-    new_credit = Transaction(
+    new_credit = Credit(
+        credit_id = random.randint(10000, 99999),
         account_nr = account_nr,
         amount = amount,
     )

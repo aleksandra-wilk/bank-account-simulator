@@ -9,8 +9,11 @@
 {% endif %}
 
 <div class="container mt-4">
+
     <h2 class="mb-4">Załóż nowe konto</h2>
+
     <form id="createAccountForm" method="POST" action="{{ url_for('create_account') }}">
+        
         <div class="form-group">
             <label for="account_type" class="form-label">Wybierz typ konta:</label>
             <select name="account_type" id="account_type" class="form-select" style="width: 300px;" required>
@@ -20,10 +23,18 @@
                 <option value="currency_usd">Konto walutowe w USD</option>
             </select>
         </div>
+
+        <div class="form-check mt-3">
+            <input type="checkbox" class="form-check-input" id="want_card" name="want_card">
+            <label class="form-check-label" for="want_card">Chcę założyć kartę do konta</label>
+        </div>
+        
         <div class="mt-4">
             <button type="submit" class="btn btn-primary" style="width: 300px;">Załóż konto</button>
         </div>
+
     </form>
+    
 </div>
 
 {% endblock %}
