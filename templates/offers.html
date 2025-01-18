@@ -1,12 +1,30 @@
 {% extends "base.html" %}
 
 {% block content %}
+<div class="container mt-5">
+    <h1>Oferty</h1>
+    <p>Zapoznaj się z naszymi ofertami!</p>
 
-<div class="container mt-4">   
+    <style>
+        .btn-uniform {
+            display: inline-block;
+            min-width: 200px; /* Minimalna szerokość, dostosuj według potrzeb */
+            text-align: center;
+        }
+    </style>
 
-    <h2 class="mb-4">Dostępne oferty</h2>
-    <p class="mb-4">Dostępne oferty</p>
+    <!-- Przycisk "Weź pożyczkę", który przekierowuje do trasy /loan -->
+    <div class="mb-3 ">
+        <a href="{{ url_for('loan') }}">
+            <button class="btn btn-primary btn-uniform">Weź pożyczkę</button>
+        </a>
+    </div>
 
+    <!-- Przycisk "Menedżer finansów" -->
+    <div class="mb-3 ">
+        <a href="{{ url_for('financial_management') }}">
+            <button class="btn btn-primary btn-uniform">Menedżer finansów</button>
+        </a>
+    </div>
 </div>
-
 {% endblock %}
