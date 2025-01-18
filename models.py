@@ -169,7 +169,7 @@ def create_credit_db(account_nr, amount):
     return new_credit
 
 
-def create_transaction_db(account_nr, amount, currency, receiver_name, receiver_account):
+def create_transaction_db(account_nr, amount, currency, receiver_name, receiver_account, title):
     
     new_transaction = Transaction(
         account_nr = account_nr,
@@ -177,6 +177,7 @@ def create_transaction_db(account_nr, amount, currency, receiver_name, receiver_
         currency = currency,
         receiver_name = receiver_name,
         receiver_account = receiver_account,
+        title = title
     )
     
     db.session.add(new_transaction)

@@ -27,7 +27,8 @@ if choice == '1':
     2 - NOWE KONTO 
     3 - NOWA KARTA 
     4 - NOWY KREDYT
-    5 - NOWA TRANSAKCJA \n
+    5 - NOWA TRANSAKCJA
+    6 - DOŁADUJ KONTO\n
                      """)
     
     if choice2 == '1': 
@@ -76,11 +77,24 @@ if choice == '1':
 
         with app.app_context():
     
-            create_transaction_db(1676716721, 500, 'PLN', 'Nadawca', 156156)
+            create_transaction_db(1676716721, 500, 'PLN', 'Nadawca', 156156, 'Tytuł')
             transactions = db.session.query(Transaction).all()
 
             print("DODANO NOWĄ TRANSAKCJĘ""")
             print(f"WSZYSTKIE TRANSAKCJE: \n{transactions}")
+
+    elif choice2 == '6':
+
+        with app.app_context():
+    
+            account = db.session.query(Account).first()
+            account.balance += 100
+
+            db.session.commit()
+
+            print("DOŁADOWANO KONTO")
+
+
 
 elif choice == '2':
 
@@ -118,7 +132,6 @@ elif choice == '2':
 
         with app.app_context():
     
-
             credits = db.session.query(Credit).all()
             print(f"WSZYSTKIE KREDTY: \n{credits}")
 
