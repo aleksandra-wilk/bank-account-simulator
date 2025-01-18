@@ -2,6 +2,7 @@ from flask import redirect, render_template, request, session, url_for, flash
 from app import app, db
 from models import Client, Account, Card, Credit, Transaction
 from models import create_account_db, create_card_db, create_client_db, create_credit_db, create_transaction_db
+import math import pow
 
 import random
 
