@@ -87,17 +87,107 @@ def products_cards():
 def products_loans():
     return render_template('products_loans.html')
 
-
-# Płatności - Przelew krajowy
-@app.route('/payments/domestic')
+# Przelew Krajowy
+@app.route('/payments/domestic', methods=['GET', 'POST'])
 def payments_domestic():
-    return render_template('payments_domestic.html')
+    if request.method == 'POST':
+        # Pobranie danych wpisanych przez użytkownika
+        sender_account = request.form.get('sender_account').replace(' ', '')
+        receiver_account = request.form.get('receiver_account').replace(' ', '')
+        receiver_name = request.form.get('receiver_name')
+        amount = float(request.form.get('amount', 0))
+        title = request.form.get('title', "Przelew krajowy")
+
+        # Weryfikacja istnienia konta nadawcy
+        sender = db.session.query(Account).filter_by(account_nr=sender_account).first()
+        if not sender:
+            flash("Podane konto nadawcy nie istnieje.", "danger")
+            return redirect(url_for('payments_domestic'))
+
+        # Sprawdzenie czy na koncie znajdują się wystarczające środki
+        if sender.balance < amount:
+            flash("Brak wystarczających środków na koncie.", "danger")
+            return redirect(url_for('payments_domestic'))
+
+        # Zmniejszenie salda
+        sender.balance -= amount
+
+        # Dodanie transakcji do bazy danych
+        new_transaction = (Transaction
+            (
+            account_nr=sender.account_nr,
+            amount=amount,
+            currency='PLN',
+            receiver_name=receiver_name,
+            receiver_account=receiver_account,
+            transfer_title = title
+            ))
+
+        db.session.add(new_transaction)
+        db.session.commit()
+
+        # Po zatwierdzeniu transakcji, zapisujemy zmiany w koncie
+        db.session.commit()
+
+        # Wyświetlenie informacji na stronie o wykonanym przelewie
+        flash("Przelew wykonano pomyślnie.", "success")
+        return redirect(url_for('payments_domestic'))
+
+    # Pobieranie kont użytkownika z bazy danych
+    accounts = db.session.query(Account).filter_by(client_id=session.get('client_id')).all()
+    return render_template('payments_domestic.html', accounts=accounts)
 
 
 # Płatności - Przelew własny
-@app.route('/payments/own')
+@app.route('/payments/own', methods=['GET', 'POST'])
 def payments_own():
-    return render_template('payments_own.html')
+    # Pobranie kont użytkownika
+    user_id = session.get('client_id') #Pobieranie id zalogowanego użytkownika
+    accounts = Account.query.filter_by(client_id=user_id).all() #Pobranie z bazy wszystkich kont zalogowanego użutkownika
+
+    if request.method == 'POST':
+        # Pobieranie danych z formularza
+        sender_account_nr = request.form.get('sender_account') #Konto, z którego wysyłamy przelew
+        receiver_account_nr = request.form.get('receiver_account') #Konto, na które wysyłamy przelew
+        amount = float(request.form.get('amount', 0)) #Kwota przelewu
+        title = request.form.get('title', 'Przelew Własny')
+
+        # Konto nadawcy i odbiorcy nie może być takie samo
+        if sender_account_nr == receiver_account_nr:
+            flash("Nie można wysłać przelewu na to samo konto.", "danger")
+            return render_template('payments_own.html', accounts=accounts)
+
+        # Pobieranie kont z bazy danych i sprawdzenie czy należą do użytkownika
+        sender_account = Account.query.filter_by(account_nr=sender_account_nr, client_id=user_id).first()
+        receiver_account = Account.query.filter_by(account_nr=receiver_account_nr, client_id=user_id).first()
+
+        # Sprawdzenie salda konta nadawcy
+        if sender_account.balance < amount:
+            flash("Brak wystarczających środków na koncie nadawcy.", "danger")
+            return render_template('payments_own.html', accounts=accounts)
+
+        # Przetwarzanie przelewu
+        sender_account.balance -= amount #Odjęcie kwoty z konta, z którego przelewamy
+        receiver_account.balance += amount #Dodanie kwoty do konta, na które przelewamy
+
+        # Dodanie transakcji do bazy danych
+        new_transaction = Transaction(
+            account_nr=sender_account_nr, #Numer konta, z którego wysłano przelew
+            amount=amount,  #Kwota
+            currency=sender_account.currency, #Waluta
+            receiver_name="Odbiorca", #Nazwa odbiorcy
+            receiver_account=receiver_account_nr, #Numer konta odbiorcy
+            transfer_title = title
+        )
+        db.session.add(new_transaction) #Dodanie do bazy danych
+
+        # Zatwierdzenie zmian w bazie danych
+        db.session.commit()
+
+        flash("Przelew wykonano pomyślnie!", "success")
+        return redirect(url_for('payments_own'))
+
+    return render_template('payments_own.html', accounts=accounts)
 
 
 # Płatności - Przelew zagraniczny

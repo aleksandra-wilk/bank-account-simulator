@@ -1,9 +1,59 @@
 {% extends "base.html" %}
 
-{% block content %}
-<div class="container mt-4">   
-    <h2 class="mb-4">Przelew własny</h2>
-    <p class="mb-4">Dostępne opcje</p>
-</div>
+{% block title %}Przelew Własny - Merito Bank{% endblock %}
 
+{% block content %}
+<header class="bg-primary text-white text-center py-3">
+    <style>
+        h1 {margin-bottom: 100px;}
+        header {margin-bottom: 40px;}
+    </style>
+    <h2>Przelew Własny</h2>
+</header>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="alert-container">
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} mt-3">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<form method="POST">
+    <div class="form-group mb-3">
+        <label for="sender_account">Wybierz konto nadawcy:</label>
+        <select class="form-control" name="sender_account" id="sender_account" required>
+            {% for account in accounts %}
+                <option value="{{ account.account_nr }}">
+                    {{ account.account_nr }} (Saldo: {{ account.balance }} {{ account.currency }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="receiver_account">Wybierz konto odbiorcy:</label>
+        <select class="form-control" name="receiver_account" id="receiver_account" required>
+            {% for account in accounts %}
+                <option value="{{ account.account_nr }}">
+                    {{ account.account_nr }} (Saldo: {{ account.balance }} {{ account.currency }})
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="amount">Kwota przelewu:</label>
+        <input type="number" class="form-control" id="amount" name="amount" min="0.01" step="0.01" required>
+    </div>
+
+    <div class="form-group mb-3">
+        <label for="title">Tytuł przelewu:</label>
+        <input type="text" class="form-control" id="title" name="title" value="Przelew własny">
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-3">Wykonaj przelew</button>
+</form>
 {% endblock %}

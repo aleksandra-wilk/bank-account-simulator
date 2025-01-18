@@ -64,6 +64,7 @@ class Transaction(db.Model):
     date = db.Column(DateTime, nullable=False, default=datetime.now)
     receiver_name = db.Column(String, nullable=False)
     receiver_account = db.Column(Integer, nullable=False)
+    transfer_title = db.Column(String, nullable=False)
 
     accounts = relationship('Account', back_populates='transactions')
     
