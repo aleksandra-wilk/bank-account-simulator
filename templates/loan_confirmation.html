@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Wyniki obliczeń pożyczki</h1>
+
+    <div class="card shadow-sm mt-4">
+        <div class="card-body">
+            <ul class="list-group list-group-flush">
+                <li class="list-group-item"><strong>Kwota pożyczki:</strong> {{ loan_data.amount }} PLN</li>
+                <li class="list-group-item"><strong>Liczba miesięcy:</strong> {{ loan_data.months }}</li>
+                <li class="list-group-item"><strong>Miesięczna rata:</strong> {{ loan_data.monthly_payment | round(2) }} PLN</li>
+                <li class="list-group-item"><strong>Prowizja:</strong> {{ loan_data.commission_amount | round(2) }} PLN</li>
+                <li class="list-group-item"><strong>Koszt ubezpieczenia:</strong> {{ loan_data.insurance_cost | round(2) }} PLN</li>
+                <li class="list-group-item"><strong>Całkowity koszt:</strong> {{ loan_data.total_cost_with_fees | round(2) }} PLN</li>
+                <li class="list-group-item"><strong>RRSO:</strong> {{ loan_data.rrso | round(2) }} %</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Przyciski na dole strony -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('loan') }}" class="btn btn-secondary">Oblicz ponownie</a>
+        <a href="#" class="btn btn-primary">Weź pożyczkę</a>
+    </div>
+</div>
+{% endblock %}
