@@ -248,9 +248,84 @@ def payments_foreign():
 
 
 # Oferty
-@app.route('/offers')
+@app.route('/offers', methods=['GET'])
 def offers():
     return render_template('offers.html')
+
+# Pożyczka
+@app.route('/loan', methods=['GET', 'POST'])
+def loan():
+    if request.method == 'POST':
+        # Pobranie danych z formularza
+        amount = float(request.form.get('amount'))
+        months = int(request.form.get('months'))
+        insurance = 'insurance' in request.form  # Checkbox dla ubezpieczenia
+
+        # Stałe parametry
+        annual_interest_rate = 0.05  # Roczna stopa procentowa (5%)
+        monthly_interest_rate = annual_interest_rate / 12
+
+        # Prowizja (założmy 3% kwoty pożyczki)
+        commission_rate = 0.03
+        commission_amount = amount * commission_rate
+
+        # Koszt ubezpieczenia (opcjonalny 2% kwoty pożyczki)
+        insurance_cost = amount * 0.02 if insurance else 0
+
+        # Obliczenie raty miesięcznej (formuła annuitetowa)
+        monthly_payment = (amount * monthly_interest_rate) / (1 - pow(1 + monthly_interest_rate, -months))
+
+        # Całkowity koszt odsetek
+        total_cost = monthly_payment * months
+
+        # Całkowity koszt z wszystkimi opłatami
+        total_cost_with_fees = total_cost + insurance_cost + commission_amount
+
+        # Obliczenie RRSO iteracyjnie
+        def calculate_rrso(amount, monthly_payment, months, insurance_cost, commission_amount):
+            guess_rate = 0.1  
+            tolerance = 1e-7  
+            max_iterations = 100  
+
+            for _ in range(max_iterations):
+
+                npv = sum([monthly_payment / pow(1 + guess_rate, n) for n in range(1, months + 1)])
+                npv += (insurance_cost + commission_amount) / (1 + guess_rate)
+                npv -= amount
+
+                derivative = sum([-n * monthly_payment / pow(1 + guess_rate, n + 1) for n in range(1, months + 1)])
+                derivative += -(insurance_cost + commission_amount) / pow(1 + guess_rate, 2)
+
+                if abs(derivative) < 1e-10:  
+                    break
+                new_guess_rate = guess_rate - npv / derivative
+
+                if abs(new_guess_rate - guess_rate) < tolerance:
+                    guess_rate = new_guess_rate
+                    break
+
+                guess_rate = new_guess_rate
+
+            return guess_rate * 12 * 100
+
+        rrso = calculate_rrso(amount, monthly_payment, months, insurance_cost, commission_amount)
+
+        # Dane pożyczki
+        loan_data = {
+            'amount': amount,
+            'months': months,
+            'monthly_payment': monthly_payment,
+            'total_cost': total_cost,
+            'insurance_cost': insurance_cost,
+            'commission_amount': commission_amount,
+            'total_cost_with_fees': total_cost_with_fees,
+            'rrso': rrso
+        }
+
+        # Wyświetlenie wyników w loan_confirmation.html
+        return render_template('loan_confirmation.html', loan_data=loan_data)
+
+    return render_template('loan.html')
 
 
 # Zarządzanie finansami
