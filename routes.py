@@ -123,26 +123,34 @@ def products_cards():
 @app.route('/products/cards/new', methods=['GET', 'POST'])
 def create_card():
     if request.method == 'POST':
-        
         account_nr = request.form.get('account_nr')
 
+        # Pobranie konta z bazy
         account = db.session.query(Account).filter(Account.account_nr == account_nr).first()
 
-        if account:  
+        if account and account.card_nr is None:  # Upewniamy się, że konto nie ma jeszcze karty
             account_type = account.account_type
             balance = account.balance
 
+            # Tworzenie nowej karty
             new_card = create_card_db(account_nr, account_type, balance)
             db.session.add(new_card)
-            db.session.commit()
-            
-            return render_template('create_card.html', message='Karta założona pomyślnie.')
-    
-    elif request.method == 'GET':
-        
-        accounts = db.session.query(Account).filter(Account.card_nr == None).all()
 
-        return render_template('create_card.html', accounts=accounts)
+            # Aktualizacja konta, aby miało przypisaną kartę
+            account.card_nr = new_card.card_nr
+
+            db.session.commit()
+
+            # Dodanie komunikatu o sukcesie
+            flash("Karta założona pomyślnie.", "success")
+
+            # Przekierowanie do listy kont bez kart, aby zaktualizować dane
+            return redirect(url_for('create_card'))
+
+    # GET: Pobranie listy kont, które nie mają jeszcze przypisanej karty
+    accounts = db.session.query(Account).filter(Account.card_nr == None).all()
+
+    return render_template('create_card.html', accounts=accounts)
 
 
 # Produkty - Pożyczki
