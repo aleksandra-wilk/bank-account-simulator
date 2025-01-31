@@ -32,29 +32,6 @@ def login():
 
     return render_template('login.html')
 
-
-# Strona główna
-# @app.route('/home', methods=['GET'])
-# def home():
-#     # if 'username' not in session:
-#     #     return redirect(url_for('login'))  # Użytkownik musi się zalogować
-#
-#         user_id = session.get('client_id')
-#
-#         # Pobranie wszystkich kont użytkownika
-#         accounts = Account.query.filter_by(client_id=user_id).all()
-#
-#         # Pobranie pierwszego konta jako domyślnego (jeśli istnieje)
-#         selected_account = accounts[0] if accounts else None
-#
-#         # Pobranie historii transakcji dla wybranego konta (ostatnie 10 transakcji)
-#         transactions = Transaction.query.filter_by(account_nr=selected_account.account_nr).order_by(Transaction.transaction_id.desc()).limit(10).all() if selected_account else []
-#         # transactions = Transaction.query.filter_by(client_id=user_id).order_by(Transaction.date.desc()).all()
-#
-#         return render_template('home_page.html', accounts=accounts, selected_account=selected_account, transactions=transactions)
-#
-#      #return render_template('home_page.html', username=session['username'])
-
 # Strona główna
 @app.route('/home', methods=['GET'])
 def home():
