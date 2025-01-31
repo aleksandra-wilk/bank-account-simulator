@@ -1,12 +1,63 @@
 {% extends "base.html" %}
 
+{% block title %}Panel Główny - Merito Bank{% endblock %}
+
 {% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Lewa kolumna: Informacje o koncie -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4>Twoje Konto</h4>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('home') }}">
+                        <label for="account_select">Wybierz konto:</label>
+                        <select id="account_select" name="account_nr" class="form-control" onchange="this.form.submit()">
+                            {% for account in accounts %}
+                                <option value="{{ account.account_nr }}" {% if account.account_nr == selected_account.account_nr %}selected{% endif %}>
+                                    {{ account.account_nr }} - {{ account.balance }} {{ account.currency }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </form>
 
-<div class="container mt-4">   
+                    {% if selected_account %}
+                        <hr>
+                        <p><strong><h3>{{ account_type_map[selected_account.account_type] }}</h3></strong></p>
+                    <p><strong>Numer konta:</strong> {{ selected_account.account_nr }}</p>
+                        <p><strong>Saldo:</strong> {{ selected_account.balance }} {{ selected_account.currency }}</p>
+                    {% else %}
+                        <p class="text-danger">Brak dostępnych kont</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
 
-    <h2 class="mb-4">Witaj, {{ username }}!</h2>
-    <p class="mb-4">To jest Twoje konto w banku.</p>
-
+        <!-- Prawa kolumna: Historia transakcji -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h4>Ostatnie Transakcje</h4>
+                </div>
+                <div class="card-body">
+                    {% if transactions %}
+                        <ul class="list-group">
+                            {% for transaction in transactions %}
+                                <li class="list-group-item">
+                                    <strong>{{ transaction.amount }} {{ transaction.currency }}</strong> -
+                                    {{ transaction.transfer_title }} ({{ transaction.receiver_account }})
+                                    <br><small>{{ transaction.date.strftime('%Y-%m-%d %H:%M:%S') }}</small>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">Brak transakcji do wyświetlenia.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
-
 {% endblock %}

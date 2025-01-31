@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
@@ -26,7 +26,8 @@ class Account(db.Model):
     client_id = db.Column(Integer, ForeignKey('clients.client_id'), nullable=False)
     card_nr = db.Column(Integer, nullable=True)
     account_type = db.Column(String, nullable=False)
-    balance = db.Column(Integer, default=0)
+    # balance = db.Column(Integer, default=0)
+    balance = db.Column(DECIMAL(10,2), default=0, nullable=False)
     currency = db.Column(String, nullable=False)
 
     clients = relationship('Client', back_populates='accounts')
@@ -67,9 +68,10 @@ class Transaction(db.Model):
     __tablename__ = 'transactions'
     transaction_id = db.Column(Integer, primary_key=True, nullable=False)
     account_nr = db.Column(Integer, ForeignKey('accounts.account_nr'), nullable=False)
-    amount = db.Column(Integer, nullable=False)
+    # amount = db.Column(Integer, nullable=False)
+    amount = db.Column(DECIMAL(10,2), nullable=False)
     currency = db.Column(String, nullable=False)
-    date = db.Column(DateTime, nullable=False, default=datetime.now().date)
+    date = db.Column(DateTime, nullable=False, default=datetime.now())
     receiver_name = db.Column(String, nullable=False)
     receiver_account = db.Column(Integer, nullable=False)
     transfer_title = db.Column(String, nullable=False)
@@ -191,9 +193,3 @@ if __name__ == "__main__":
         print("Creating database tables...")
         db.create_all()
         print("Done")
-
-
-
-
-
-

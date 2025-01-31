@@ -1,9 +1,9 @@
 from flask import redirect, render_template, request, session, url_for, flash
+from decimal import Decimal
 from app import app, db
 from models import Client, Account, Card, Credit, Transaction
 from models import create_account_db, create_card_db, create_client_db, create_credit_db, create_transaction_db
 from math import pow
-
 import random
 
 # Strona logowania
@@ -34,14 +34,55 @@ def login():
 
 
 # Strona główna
-@app.route('/home')
+# @app.route('/home', methods=['GET'])
+# def home():
+#     # if 'username' not in session:
+#     #     return redirect(url_for('login'))  # Użytkownik musi się zalogować
+#
+#         user_id = session.get('client_id')
+#
+#         # Pobranie wszystkich kont użytkownika
+#         accounts = Account.query.filter_by(client_id=user_id).all()
+#
+#         # Pobranie pierwszego konta jako domyślnego (jeśli istnieje)
+#         selected_account = accounts[0] if accounts else None
+#
+#         # Pobranie historii transakcji dla wybranego konta (ostatnie 10 transakcji)
+#         transactions = Transaction.query.filter_by(account_nr=selected_account.account_nr).order_by(Transaction.transaction_id.desc()).limit(10).all() if selected_account else []
+#         # transactions = Transaction.query.filter_by(client_id=user_id).order_by(Transaction.date.desc()).all()
+#
+#         return render_template('home_page.html', accounts=accounts, selected_account=selected_account, transactions=transactions)
+#
+#      #return render_template('home_page.html', username=session['username'])
+
+# Strona główna
+@app.route('/home', methods=['GET'])
 def home():
-    if 'username' not in session:
-        return redirect(url_for('login'))  # Użytkownik musi się zalogować
+    user_id = session.get('client_id')
 
+    # Pobranie wszystkich kont użytkownika
+    accounts = Account.query.filter_by(client_id=user_id).all()
 
-    return render_template('home_page.html', username=session['username'])
+    # Mapa nazw typów kont
+    account_type_map = {
+        'current': 'Konto Bieżące',
+        'savings': 'Konto Oszczędnościowe',
+        'currency_eur': 'Konto Walutowe (EUR)',
+        'currency_usd': 'Konto Walutowe (USD)'
+    }
 
+    # Wybór konta domyślnego (konto bieżące) lub pierwsze dostępne konto
+    selected_account = next((acc for acc in accounts if acc.account_type == 'current'), accounts[0]) if accounts else None
+
+    # Pobranie historii transakcji dla użytkownika (ostatnie 10 transakcji)
+    transactions = Transaction.query.filter(Transaction.account_nr.in_([acc.account_nr for acc in accounts])).order_by(Transaction.date.desc()).limit(10).all() if accounts else []
+
+    # Obsługa zmiany konta przez użytkownika
+    selected_account_nr = request.args.get('account_nr')
+    if selected_account_nr:
+        selected_account = Account.query.filter_by(account_nr=selected_account_nr, client_id=user_id).first()
+
+    return render_template('home_page.html', accounts=accounts, selected_account=selected_account, transactions=transactions, account_type_map=account_type_map)
 
 # Produkty - Konta
 @app.route('/products/accounts', methods=['GET'])
@@ -139,19 +180,36 @@ def products_loans():
 
     return render_template('products_loans.html', credits=credits)
 
-# Przelew Krajowy
+# Kursy walutowe
+def get_exchange_rate(from_currency, to_currency):
+    if from_currency == to_currency:
+        return Decimal(1.0)
+
+    exchange_rates = {
+        ('PLN', 'EUR'): Decimal('0.24'),
+        ('EUR', 'PLN'): Decimal('4.2'),
+        ('USD', 'PLN'): Decimal('4.0'),
+        ('PLN', 'USD'): Decimal('0.25'),
+        ('EUR', 'USD'): Decimal('1.1'),
+        ('USD', 'EUR'): Decimal('0.91')
+    }
+
+    exchange_rate = exchange_rates.get((from_currency, to_currency))
+    return exchange_rate
+
+# Płatności - Przelew Krajowy
 @app.route('/payments/domestic', methods=['GET', 'POST'])
 def payments_domestic():
     if request.method == 'POST':
         # Pobranie danych wpisanych przez użytkownika
-        sender_account = request.form.get('sender_account').replace(' ', '')
-        receiver_account = request.form.get('receiver_account').replace(' ', '')
+        sender_account_nr = request.form.get('sender_account').replace(' ', '')
+        receiver_account_nr = request.form.get('receiver_account').replace(' ', '')
         receiver_name = request.form.get('receiver_name')
         amount = float(request.form.get('amount', 0))
         title = request.form.get('title', "Przelew krajowy")
 
         # Weryfikacja istnienia konta nadawcy
-        sender = db.session.query(Account).filter_by(account_nr=sender_account).first()
+        sender = db.session.query(Account).filter_by(account_nr=sender_account_nr).first()
         if not sender:
             flash("Podane konto nadawcy nie istnieje.", "danger")
             return redirect(url_for('payments_domestic'))
@@ -162,16 +220,17 @@ def payments_domestic():
             return redirect(url_for('payments_domestic'))
 
         # Zmniejszenie salda
+        amount = Decimal(amount)
         sender.balance -= amount
 
         # Dodanie transakcji do bazy danych
         new_transaction = (Transaction
             (
-            account_nr=sender.account_nr,
-            amount=amount,
-            currency='PLN',
-            receiver_name=receiver_name,
-            receiver_account=receiver_account,
+            account_nr = sender.account_nr,
+            amount = amount,
+            currency = sender.currency,
+            receiver_name = receiver_name,
+            receiver_account = receiver_account_nr,
             transfer_title = title
             ))
 
@@ -189,63 +248,114 @@ def payments_domestic():
     accounts = db.session.query(Account).filter_by(client_id=session.get('client_id')).all()
     return render_template('payments_domestic.html', accounts=accounts)
 
-
 # Płatności - Przelew własny
 @app.route('/payments/own', methods=['GET', 'POST'])
 def payments_own():
     # Pobranie kont użytkownika
-    user_id = session.get('client_id') #Pobieranie id zalogowanego użytkownika
-    accounts = Account.query.filter_by(client_id=user_id).all() #Pobranie z bazy wszystkich kont zalogowanego użutkownika
+    user_id = session.get('client_id') #identyfikator zalogowanego użytkownika
+    accounts = Account.query.filter_by(client_id=user_id).all() #Szukamy kont powiązanch
 
     if request.method == 'POST':
-        # Pobieranie danych z formularza
-        sender_account_nr = request.form.get('sender_account') #Konto, z którego wysyłamy przelew
-        receiver_account_nr = request.form.get('receiver_account') #Konto, na które wysyłamy przelew
-        amount = float(request.form.get('amount', 0)) #Kwota przelewu
+        sender_account_nr = request.form.get('sender_account')
+        receiver_account_nr = request.form.get('receiver_account')
+        amount = Decimal(request.form.get('amount', 0))
         title = request.form.get('title', 'Przelew Własny')
 
-        # Konto nadawcy i odbiorcy nie może być takie samo
+        #Sprawdzenie czy nie przelewamy na to samo konto
         if sender_account_nr == receiver_account_nr:
             flash("Nie można wysłać przelewu na to samo konto.", "danger")
             return render_template('payments_own.html', accounts=accounts)
 
-        # Pobieranie kont z bazy danych i sprawdzenie czy należą do użytkownika
+        #Pobranie konta odbiorcy i nadawcy oraz sprawdzenie czy należą do zalogowanego użytkownika
         sender_account = Account.query.filter_by(account_nr=sender_account_nr, client_id=user_id).first()
         receiver_account = Account.query.filter_by(account_nr=receiver_account_nr, client_id=user_id).first()
 
-        # Sprawdzenie salda konta nadawcy
+        #Sprawdzenie salda
         if sender_account.balance < amount:
             flash("Brak wystarczających środków na koncie nadawcy.", "danger")
             return render_template('payments_own.html', accounts=accounts)
 
+        #Pobranie walut jakie są przypisane do konta
+        sender_currency = sender_account.currency
+        receiver_currency = receiver_account.currency
+
+        # Jeśli waluty są różne, robimy przewalutowanie
+        if sender_currency != receiver_currency:
+            exchange_rate = get_exchange_rate(sender_currency, receiver_currency)
+
+            if exchange_rate is None:
+                flash("Błąd: nie można pobrać kursu wymiany dla podanej pary walut.", "danger")
+                return render_template('payments_own.html', accounts=accounts)
+
+            converted_amount = (amount * exchange_rate).quantize(Decimal('0.01')) #Przewalutowanie i zaokrąglenie
+        else:
+            converted_amount = amount
+
         # Przetwarzanie przelewu
-        sender_account.balance -= amount #Odjęcie kwoty z konta, z którego przelewamy
-        receiver_account.balance += amount #Dodanie kwoty do konta, na które przelewamy
+        sender_account.balance -= amount
+        receiver_account.balance += converted_amount
 
         # Dodanie transakcji do bazy danych
         new_transaction = Transaction(
-            account_nr=sender_account_nr, #Numer konta, z którego wysłano przelew
-            amount=amount,  #Kwota
-            currency=sender_account.currency, #Waluta
-            receiver_name="Odbiorca", #Nazwa odbiorcy
-            receiver_account=receiver_account_nr, #Numer konta odbiorcy
-            transfer_title = title
+            account_nr=sender_account_nr,
+            amount=amount,
+            currency=sender_currency,
+            receiver_name="Przelew Własny",
+            receiver_account=receiver_account_nr,
+            transfer_title=title
         )
-        db.session.add(new_transaction) #Dodanie do bazy danych
-
-        # Zatwierdzenie zmian w bazie danych
+        db.session.add(new_transaction)
         db.session.commit()
 
-        flash("Przelew wykonano pomyślnie!", "success")
+        flash(f"Przelew wykonano pomyślnie! Przeliczona kwota: {converted_amount} {receiver_currency}", "success")
         return redirect(url_for('payments_own'))
 
     return render_template('payments_own.html', accounts=accounts)
 
-
 # Płatności - Przelew zagraniczny
-@app.route('/payments/foreign')
+@app.route('/payments/foreign', methods=['GET', 'POST'])
 def payments_foreign():
-    return render_template('payments_foreign.html')
+    if request.method == 'POST':
+        sender_account_nr = request.form.get('sender_account')
+        receiver_account_nr = request.form.get('receiver_account')
+        receiver_name = request.form.get('receiver_name')
+        amount = float(request.form.get('amount', 0))
+        currency = request.form.get('currency')
+        title = request.form.get('title', "Przelew Zagraniczny")
+
+        #Pobranie informacji o walucie, z którego wysyłamy przelew
+        sender = db.session.query(Account).filter_by(account_nr=sender_account_nr).first()
+        sender_account = sender.currency
+
+        # odjęcię kwoty z konta nadawcy
+        exchange_rate = get_exchange_rate(sender_account, currency)  # Kurs walut
+        amount = Decimal(amount)
+        converted_amount = amount / exchange_rate
+        sender.balance -= converted_amount
+
+        #Sprawdzanie salda nadawcy (uwzględniając przewalutowanie)
+        if sender.balance < amount:
+            flash("Brak wystarczających środków na koncie.", "danger")
+            return redirect(url_for('payments_foreign'))
+
+        #Zapisanie transakcji w bazie danych
+        new_transaction = Transaction(
+            account_nr=sender.account_nr,
+            amount=amount,
+            currency=currency,
+            receiver_name=receiver_name,
+            receiver_account=receiver_account_nr,
+            transfer_title=title
+        )
+
+        db.session.add(new_transaction)
+        db.session.commit()
+
+        flash("Przelew zagraniczny wykonano pomyślnie.", "success")
+        return redirect(url_for('payments_foreign'))
+
+    accounts = db.session.query(Account).filter_by(client_id=session.get('client_id')).all()
+    return render_template('payments_foreign.html', accounts=accounts, currencies=['PLN', 'EUR', 'USD'])
 
 
 # Oferty
