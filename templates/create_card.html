@@ -2,23 +2,27 @@
 
 {% block content %}
 
-{% if message %}
-<div class="alert alert-success" style="width: 300px;">
-    {{ message }}
-</div>
-{% endif %}
+<!-- Obsługa komunikatu Flash -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
 
 <div class="container mt-4">
-
     <h2 class="mb-4">Załóż nową kartę</h2>
-    <p class="mb-3">Lista kont bez istniejącej karty</p>
+    <p class="mb-3">Lista kont bez przypisanej karty:</p>
 
-    {% if accounts %}
+    {% if accounts %}  
         <div class="list-group">
             {% for account in accounts %}
                 <div class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
-                        <strong>Konto nr:</strong> {{ account.account_nr }} <br>
+                        <strong>Konto nr:</strong> {{ account.account_nr }}
                     </div>
                     <form method="POST" action="{{ url_for('create_card') }}" class="mb-0">
                         <input type="hidden" name="account_nr" value="{{ account.account_nr }}">
@@ -27,10 +31,9 @@
                 </div>
             {% endfor %}
         </div>
-
     {% else %}
         <div class="alert alert-warning" role="alert">
-            Brak dostępnych kont do utworzenia karty.
+            Brak kont bez przypisanej karty.
         </div>
     {% endif %}
 

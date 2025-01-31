@@ -15,7 +15,6 @@
                 <th>Typ konta</th>
                 <th>Nr karty</th>
                 <th>Saldo</th>
-                <th>Waluta</th>
             </tr>
         </thead>
 
@@ -42,8 +41,7 @@
                             {{ account.card_nr }}
                         {% endif %}
                     </td>
-                    <td>{{ account.balance }}</td>
-                    <td>{{ account.currency }}</td>
+                    <td>{{ account.balance }} {{ account.currency }}</td>
                 </tr>
                 {% endfor %}
             {% else %}

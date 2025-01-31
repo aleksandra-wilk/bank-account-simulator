@@ -14,7 +14,6 @@
                 <th>Nr karty</th>
                 <th>Nr konta do karty</th>
                 <th>Saldo</th>
-                <th>Waluta</th>
             </tr>
         </thead>
 
@@ -24,8 +23,7 @@
                 <tr>
                     <td>{{ card.card_nr }}</td>
                     <td>{{ card.account_nr }}</td>
-                    <td>{{ card.balance }}</td>
-                    <td>{{ card.currency }}</td>
+                    <td>{{ card.balance }} {{ card.currency }}</td>
                 </tr>
                 {% endfor %}
             {% else %}
