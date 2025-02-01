@@ -8,6 +8,7 @@ import random
 import pandas as pd
 from datetime import datetime, timedelta
 
+
 # Strona logowania
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -63,6 +64,7 @@ def home():
 
     return render_template('home_page.html', accounts=accounts, selected_account=selected_account, transactions=transactions, account_type_map=account_type_map)
 
+
 # Produkty - Konta
 @app.route('/products/accounts', methods=['GET'])
 def products_accounts():
@@ -116,8 +118,6 @@ def products_cards():
         card.card_nr = str(card.card_nr)
         card.card_nr = f"{card.card_nr[:4]} {card.card_nr[4:8]} {card.card_nr[8:12]} {card.card_nr[12:16]}"
 
-
-
     return render_template('products_cards.html', cards=cards)
 
 
@@ -126,32 +126,20 @@ def products_cards():
 def create_card():
     if request.method == 'POST':
         account_nr = request.form.get('account_nr')
-
-        # Pobranie konta z bazy
         account = db.session.query(Account).filter(Account.account_nr == account_nr).first()
 
-        if account and account.card_nr is None:  # Upewniamy się, że konto nie ma jeszcze karty
+        if account and account.card_nr is None: 
             account_type = account.account_type
             balance = account.balance
-
-            # Tworzenie nowej karty
             new_card = create_card_db(account_nr, account_type, balance)
             db.session.add(new_card)
-
-            # Aktualizacja konta, aby miało przypisaną kartę
             account.card_nr = new_card.card_nr
-
             db.session.commit()
 
-            # Dodanie komunikatu o sukcesie
             flash("Karta założona pomyślnie.", "success")
-
-            # Przekierowanie do listy kont bez kart, aby zaktualizować dane
             return redirect(url_for('create_card'))
 
-    # GET: Pobranie listy kont, które nie mają jeszcze przypisanej karty
     accounts = db.session.query(Account).filter(Account.card_nr == None).all()
-
     return render_template('create_card.html', accounts=accounts)
 
 
@@ -183,6 +171,7 @@ def get_exchange_rate(from_currency, to_currency):
 
     exchange_rate = exchange_rates.get((from_currency, to_currency))
     return exchange_rate
+
 
 # Płatności - Przelew Krajowy
 @app.route('/payments/domestic', methods=['GET', 'POST'])
@@ -234,6 +223,7 @@ def payments_domestic():
     # Pobieranie kont użytkownika z bazy danych
     accounts = db.session.query(Account).filter_by(client_id=session.get('client_id')).all()
     return render_template('payments_domestic.html', accounts=accounts)
+
 
 # Płatności - Przelew własny
 @app.route('/payments/own', methods=['GET', 'POST'])
@@ -350,6 +340,7 @@ def payments_foreign():
 def offers():
     return render_template('offers.html')
 
+
 # Pożyczka
 @app.route('/loan', methods=['GET', 'POST'])
 def loan():
@@ -426,9 +417,6 @@ def loan():
     return render_template('loan.html')
 
 
-
-
-
 def add_sample_transactions():
     if Transaction.query.count() == 0:
         categories = [
@@ -451,11 +439,11 @@ def add_sample_transactions():
         for month in range(1, 13):  # 12 ostatnich miesięcy
             for i in range(8):  # 8 wydatków
                 days_offset = random.randint(0, 29)  # Losowy dzień w miesiącu
-                amount = round(random.uniform(10, 500), 2)  # 🔹 Nowy zakres wydatków: 10 - 500 PLN
+                amount = round(random.uniform(10, 500), 2)  # Zakres wydatków 10 - 500 
                 
                 sample_transactions.append(Transaction(
                     account_nr=10000 + i + month,
-                    amount=Decimal(-amount),  # Wydatki są ujemne
+                    amount=Decimal(-amount), 
                     currency='PLN',
                     date=datetime.now() - timedelta(days=days_offset + (month - 1) * 30),
                     receiver_name=categories[i % len(categories)][0],
@@ -464,11 +452,11 @@ def add_sample_transactions():
                 ))
 
             for i in range(2):  # 2 przychody
-                amount = round(random.uniform(7000, 11000), 2)  # 🔹 Nowy zakres przychodów: 7000 - 11 000 PLN
+                amount = round(random.uniform(7000, 11000), 2)  # Zakres przychodów 7000 - 11 000
                 
                 sample_transactions.append(Transaction(
                     account_nr=20000 + i + month,
-                    amount=Decimal(amount),  # Przychody są dodatnie
+                    amount=Decimal(amount),  
                     currency='PLN',
                     date=datetime.now() - timedelta(days=random.randint(0, 29) + (month - 1) * 30),
                     receiver_name=incomes[i][0],
@@ -481,29 +469,27 @@ def add_sample_transactions():
 
         print("Dodano przykładowe transakcje.")
 
+
 # Route do analizy finansowej
 @app.route('/financial_management', methods=['GET'])
 def financial_management():
-    add_sample_transactions()  # Upewniamy się, że są transakcje
+    add_sample_transactions()
     return render_template('fin_man.html')
+
 
 # API do pobierania analizy finansowej
 @app.route('/get_financial_data', methods=['POST'])
 def get_financial_data():
     try:
-        months = int(request.json.get('months', 3))  # Pobierz liczbę miesięcy (domyślnie 3)
-
-        # Oblicz datę początkową
+        months = int(request.json.get('months', 3)) 
         start_date = datetime.now() - timedelta(days=months * 30)
-
-        # Pobierz transakcje z bazy dla wybranego okresu
         transactions = Transaction.query.filter(Transaction.date >= start_date).all()
 
-        # Konwersja do DataFrame (Pandas)
+        # Konwersja do DataFrame
         df = pd.DataFrame([
             {
                 'date': t.date,
-                'amount': float(t.amount),  # Konwersja Decimal → float
+                'amount': float(t.amount),  # Konwersja Decimal - float
                 'currency': t.currency
             } for t in transactions
         ])
@@ -511,7 +497,7 @@ def get_financial_data():
         if df.empty:
             return jsonify({'income': 0, 'expenses': 0})
 
-        # Oblicz sumę przychodów (amount > 0) i wydatków (amount < 0)
+        # Oblicza sumę przychodów (amount > 0) i wydatków (amount < 0)
         total_income = df[df['amount'] > 0]['amount'].sum()
         total_expenses = df[df['amount'] < 0]['amount'].sum()
 
@@ -519,7 +505,6 @@ def get_financial_data():
 
     except Exception as e:
         return jsonify({'error': str(e)}), 500
-
 
 
 # Wylogowanie
