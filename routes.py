@@ -1,10 +1,12 @@
-from flask import redirect, render_template, request, session, url_for, flash
+from flask import redirect, render_template, request, session, url_for, flash, jsonify
 from decimal import Decimal
 from app import app, db
 from models import Client, Account, Card, Credit, Transaction
 from models import create_account_db, create_card_db, create_client_db, create_credit_db, create_transaction_db
 from math import pow
 import random
+import pandas as pd
+from datetime import datetime, timedelta
 
 # Strona logowania
 @app.route('/', methods=['GET', 'POST'])
@@ -424,10 +426,100 @@ def loan():
     return render_template('loan.html')
 
 
-# Zarządzanie finansami
-@app.route('/financial_management')
+
+
+
+def add_sample_transactions():
+    if Transaction.query.count() == 0:
+        categories = [
+            ("Biedronka", "Zakupy spożywcze"),
+            ("Media Markt", "Sprzęt elektroniczny"),
+            ("Rossmann", "Kosmetyki"),
+            ("Netflix", "Subskrypcja"),
+            ("Orlen", "Paliwo"),
+            ("KFC", "Jedzenie"),
+            ("Empik", "Książki"),
+            ("Spotify", "Muzyka"),
+        ]
+        incomes = [
+            ("Pracodawca", "Wypłata"),
+            ("Freelance", "Zlecenie")
+        ]
+
+        sample_transactions = []
+
+        for month in range(1, 13):  # 12 ostatnich miesięcy
+            for i in range(8):  # 8 wydatków
+                days_offset = random.randint(0, 29)  # Losowy dzień w miesiącu
+                amount = round(random.uniform(10, 500), 2)  # 🔹 Nowy zakres wydatków: 10 - 500 PLN
+                
+                sample_transactions.append(Transaction(
+                    account_nr=10000 + i + month,
+                    amount=Decimal(-amount),  # Wydatki są ujemne
+                    currency='PLN',
+                    date=datetime.now() - timedelta(days=days_offset + (month - 1) * 30),
+                    receiver_name=categories[i % len(categories)][0],
+                    receiver_account=random.randint(10000, 99999),
+                    transfer_title=categories[i % len(categories)][1]
+                ))
+
+            for i in range(2):  # 2 przychody
+                amount = round(random.uniform(7000, 11000), 2)  # 🔹 Nowy zakres przychodów: 7000 - 11 000 PLN
+                
+                sample_transactions.append(Transaction(
+                    account_nr=20000 + i + month,
+                    amount=Decimal(amount),  # Przychody są dodatnie
+                    currency='PLN',
+                    date=datetime.now() - timedelta(days=random.randint(0, 29) + (month - 1) * 30),
+                    receiver_name=incomes[i][0],
+                    receiver_account=random.randint(10000, 99999),
+                    transfer_title=incomes[i][1]
+                ))
+
+        db.session.bulk_save_objects(sample_transactions)
+        db.session.commit()
+
+        print("Dodano przykładowe transakcje.")
+
+# Route do analizy finansowej
+@app.route('/financial_management', methods=['GET'])
 def financial_management():
+    add_sample_transactions()  # Upewniamy się, że są transakcje
     return render_template('fin_man.html')
+
+# API do pobierania analizy finansowej
+@app.route('/get_financial_data', methods=['POST'])
+def get_financial_data():
+    try:
+        months = int(request.json.get('months', 3))  # Pobierz liczbę miesięcy (domyślnie 3)
+
+        # Oblicz datę początkową
+        start_date = datetime.now() - timedelta(days=months * 30)
+
+        # Pobierz transakcje z bazy dla wybranego okresu
+        transactions = Transaction.query.filter(Transaction.date >= start_date).all()
+
+        # Konwersja do DataFrame (Pandas)
+        df = pd.DataFrame([
+            {
+                'date': t.date,
+                'amount': float(t.amount),  # Konwersja Decimal → float
+                'currency': t.currency
+            } for t in transactions
+        ])
+
+        if df.empty:
+            return jsonify({'income': 0, 'expenses': 0})
+
+        # Oblicz sumę przychodów (amount > 0) i wydatków (amount < 0)
+        total_income = df[df['amount'] > 0]['amount'].sum()
+        total_expenses = df[df['amount'] < 0]['amount'].sum()
+
+        return jsonify({'income': total_income, 'expenses': abs(total_expenses)})
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 
 # Wylogowanie

@@ -2,11 +2,48 @@
 
 {% block content %}
 
-<div class="container mt-4">   
+<div class="container mt-4">
+    <h2 class="mb-3">Manager finansów</h2>
+    <p class="mb-4">Twoje podsumowanie finansowe</p>
 
-    <h2 class="mb-4">Manager finansów</h2>
-    <p class="mb-4">Twoje podsumowanie finansów</p>
+    <!-- Suwak wyboru okresu analizy -->
+    <div class="mb-4">
+        <label for="months" class="form-label"><b>Wybierz zakres analizy (miesiące):</b></label>
+        <input type="range" id="months" class="form-range" min="1" max="12" value="3" oninput="updateFinancialData()">
+        <span id="selected-months"></span>
+    </div>
 
+    <!-- Podsumowanie finansów -->
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Podsumowanie</h5>
+            <p><b>Przychody:</b> <span id="income">...</span> PLN</p>
+            <p><b>Wydatki:</b> <span id="expenses">...</span> PLN</p>
+        </div>
+    </div>
 </div>
+
+<script>
+    function updateFinancialData() {
+        let months = document.getElementById("months").value;
+        let monthText = months == 1 ? "miesiąc" : (months >= 2 && months <= 4 ? "miesiące" : "miesięcy");
+        document.getElementById("selected-months").innerText = months + " " + monthText;
+
+        fetch("/get_financial_data", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ months: months })
+        })
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById("income").innerText = data.income.toFixed(2);
+            document.getElementById("expenses").innerText = data.expenses.toFixed(2);
+        });
+    }
+
+    // Załaduj domyślne dane po otwarciu strony
+    document.addEventListener("DOMContentLoaded", updateFinancialData);
+</script>
+
 
 {% endblock %}
