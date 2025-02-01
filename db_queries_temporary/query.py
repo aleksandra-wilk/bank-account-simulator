@@ -77,7 +77,7 @@ if choice == '1':
 
         with app.app_context():
     
-            create_transaction_db(1676716721, 500, 'PLN', 'Nadawca', 156156, 'Tytuł')
+            create_transaction_db(account_nr=150909666619426836, amount=500, currency='PLN', receiver_name='Nadawca', receiver_account=158899000022220000, title='Tytuł')
             transactions = db.session.query(Transaction).all()
 
             print("DODANO NOWĄ TRANSAKCJĘ""")

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String, DECIMAL, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 from app import app, db
 import random
@@ -172,20 +172,23 @@ def create_credit_db(account_nr, amount):
 
 
 def create_transaction_db(account_nr, amount, currency, receiver_name, receiver_account, title):
-    
-    new_transaction = Transaction(
-        account_nr = account_nr,
-        amount = amount,
-        currency = currency,
-        receiver_name = receiver_name,
-        receiver_account = receiver_account,
-        title = title
-    )
-    
-    db.session.add(new_transaction)
-    db.session.commit()
-    
-    return new_transaction
+    try:
+        new_transaction = Transaction(
+            account_nr=account_nr,
+            amount=amount,
+            currency=currency,
+            receiver_name=receiver_name,
+            receiver_account=receiver_account,
+            transfer_title=title
+        )
+        
+        db.session.add(new_transaction)
+        db.session.commit()
+        return new_transaction
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        print(f"Błąd podczas tworzenia transakcji: {e}")
+        return None
 
 
 if __name__ == "__main__":
