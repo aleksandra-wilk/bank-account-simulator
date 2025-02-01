@@ -128,7 +128,7 @@ def create_card_db(account_nr, account_type, balance):
     new_card = Card(
         card_nr = random.randint(1155_0900_0000_0000, 1155_0900_9999_9999),
         account_nr = account_nr,
-        balance = balance,
+        balance = float(balance),
         currency = currency, 
     )
     
