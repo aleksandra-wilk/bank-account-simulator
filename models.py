@@ -38,6 +38,7 @@ class Account(db.Model):
     def __repr__(self):
         return f"<Account(account_nr={self.account_nr}, client_id={self.client_id}, card_nr={self.card_nr}, account_type={self.account_type}),balance={self.balance}, currency={self.currency}>"
 
+
 class Card(db.Model):
     __tablename__ = 'cards'
     card_nr = db.Column(Integer, primary_key=True, nullable=False)
