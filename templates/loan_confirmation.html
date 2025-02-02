@@ -1,10 +1,9 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mt-5">
-    <h1 class="text-center">Wyniki obliczeń pożyczki</h1>
+<div class="container mt-4">  <h2 class="text-center mb-4">Wyniki obliczeń pożyczki</h2>
 
-    <div class="card shadow-sm mt-4">
+    <div class="card shadow-sm">
         <div class="card-body">
             <ul class="list-group list-group-flush">
                 <li class="list-group-item"><strong>Kwota pożyczki:</strong> {{ loan_data.amount }} PLN</li>
@@ -18,13 +17,12 @@
         </div>
     </div>
 
-    <!-- Przyciski na dole strony -->
-    <div class="text-center mt-4">
-        <a href="{{ url_for('loan') }}" class="btn btn-secondary">Oblicz ponownie</a>
-    
+    <div class="d-flex justify-content-center mt-4">  <a href="{{ url_for('loan') }}" class="btn btn-secondary me-2">Oblicz ponownie</a>
+
         <form method="POST" action="{{ url_for('create_credit') }}" class="d-inline">
             <input type="hidden" name="amount" value="{{ loan_data.amount }}">
             <button type="submit" class="btn btn-primary">Weź pożyczkę</button>
         </form>
     </div>
+</div>
 {% endblock %}
