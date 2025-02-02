@@ -147,7 +147,7 @@ def create_credit():
     if request.method == 'POST':
         amount = request.form.get('amount', type=float)  
 
-        account = db.session.query(Account).filter(Account.card_nr != None).first()
+        account = db.session.query(Account).filter(Account.account_type == 'current').first()
 
         if not account:
             flash("Nie znaleziono dostępnego konta do przypisania kredytu.", "danger")
