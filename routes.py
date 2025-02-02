@@ -132,15 +132,34 @@ def create_card():
             account_type = account.account_type
             balance = account.balance
             new_card = create_card_db(account_nr, account_type, balance)
-            db.session.add(new_card)
             account.card_nr = new_card.card_nr
-            db.session.commit()
 
             flash("Karta założona pomyślnie.", "success")
             return redirect(url_for('create_card'))
 
     accounts = db.session.query(Account).filter(Account.card_nr == None).all()
     return render_template('create_card.html', accounts=accounts)
+
+
+# Oferty - Dodanie kredytu
+@app.route('/products/loan/new', methods=['GET', 'POST'])
+def create_credit():
+    if request.method == 'POST':
+        amount = request.form.get('amount', type=float)  
+
+        account = db.session.query(Account).filter(Account.card_nr != None).first()
+
+        if not account:
+            flash("Nie znaleziono dostępnego konta do przypisania kredytu.", "danger")
+            return redirect(url_for('create_credit'))
+
+        create_credit_db(account.account_nr, amount) 
+
+        flash("Kredyt został pomyślnie założony.", "success")
+        return redirect(url_for('loan'))
+
+    return render_template('loan.html')
+
 
 
 # Produkty - Pożyczki
